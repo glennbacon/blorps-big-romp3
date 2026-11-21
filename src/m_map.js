@@ -131,13 +131,13 @@ function buildIsle(){
   /* 1 Blossom Bluffs, south-west: a low garden with a terrace along the back and a hill in each far corner */
   B.blob(10,43,8,5.5,0,2).flat(10,40.6,7.4,2.3,4,0.25).raise(4.5,40,2.4,3,0.7).raise(12,39,2.2,2,0.8);
   /* 2 Caramel Orchard, south: rolling ground, a tall hill in the north-west and a low one in the south-east */
-  B.blob(29,43,8.5,6,1,3).raise(25,39.6,3.2,4,0.7).raise(36,46,2.4,2,0.8).raise(29,48,2.2,1,0.8);
+  B.blob(29,43,8.5,6,1,3).raise(25,39.6,3.2,4,0.7).raise(36,46,2.4,2,0.8).raise(29,48,2.2,1,0.8).flat(33,40.6,2.4,2.7,4,0);
   /* 3 Honeycomb Heights, south: three terraces of comb, stepping up to the north */
   B.blob(48,43,8,5.5,2,3,0.2).flat(48,41.4,7,2.9,5,0.2).flat(46,39.6,3.6,1.6,7,0.2);
   /* 4 Firefly Fen, south-east: low and wet, pools everywhere, firmer ground along the north */
   B.blob(67,41,8,7,3,2,0.25).flat(67,42.4,6.6,4,1,0.3).pool(64.6,43.6,1.6,1.1,MK_POND,0.3).pool(70.6,47.6,2.2,0.9,MK_POND,0.3).pool(66.4,39.6,1.5,1,MK_POND,0.3).pool(73.4,39.4,1.1,1.5,MK_POND,0.3).pool(61.6,39,1,1.2,MK_POND,0.3);
   /* 5 Fossil Falls, east: two mesas with a canyon between them, a river in it, and low ground to the south */
-  B.blob(65,24,8.5,6.5,4,4,0.2).flat(70,22.6,4.4,4.4,8,0.2).flat(71.5,19.6,2.6,1.6,10,0.2).flat(61.6,22,3.6,3.6,7,0.2).flat(65.6,22.6,1.3,5.6,2,0).pool(65.6,22.4,0.8,5,MK_POND,0);
+  B.blob(65,24,8.5,6.5,4,4,0.2).blob(70.5,19.6,2.6,1.7,4,4,0).flat(70,22.6,4.4,4.4,8,0.2).flat(71.5,19.6,2.6,1.6,10,0.2).flat(61.6,22,3.6,3.6,7,0.2).flat(65.6,22.6,1.3,5.6,2,0).pool(65.6,22.6,1.3,5.6,MK_POND,0);
   /* 6 Popcorn Park, middle: a fairground, flat as a table, with a low rise at the back for the big top */
   B.blob(45,25,8,5.5,5,3,0.2).flat(44,22.4,5,2.4,4,0.2);
   /* 7 Boombox Boulevard, middle: a stage in three steps, the highest at the back */
@@ -161,7 +161,7 @@ function buildIsle(){
   return {ISLE:I,MAPNODES:made.nodes,MAPSEGS:made.segs};
 }
 /* where the plain way between two markers is not the one wanted: the stretch's number, and its shape */
-const MAP_HINTS={};
+const MAP_HINTS={22:'NNNWWW',23:'SSSWWWWWWW'}; /* up over the high mesa, then the rope bridge across the canyon */
 const {ISLE,MAPNODES,MAPSEGS}=buildIsle();
 
 /* ---------- the rules of walking ---------- */

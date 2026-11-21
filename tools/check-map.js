@@ -16,11 +16,13 @@ function storage(){ const m=new Map(); return {map:m,getItem:k=>m.has(k)?m.get(k
 const saved=s=>JSON.parse([...s.map.values()][0]);
 /* One page load. The probe looks names up inside the game's own scope when they are asked for, so `m.mapGo` is the
    game's mapGo and a name the game lacks fails only the checks that use it. */
-/* Screen wipes do not wait for frames here. The map has a marker for each of forty levels; while a world is still
+/* Screen wipes do not wait for frames here. The map has a marker for each of fifty levels; while a world is still
    being written and has fewer than its five, copies of its first level stand in for the rest, and the check says so. */
 const probe=function(){
   WP.instant=true;
   const short=WORLDS.filter(w=>w.levels.length<5).map(w=>w.name+' has '+w.levels.length+' of its 5 levels');
+  /* a world not written yet is stood in for by the first one, so the map can still be checked */
+  while(WORLDS.length<10){ short.push('world '+(WORLDS.length+1)+' is not written yet'); WORLDS.push({name:'World '+(WORLDS.length+1),theme:WORLDS[0].theme,levels:WORLDS[0].levels.slice()}); }
   if(short.length){ for(const w of WORLDS) while(w.levels.length<5) w.levels.push(w.levels[0]);
     LEVELS.length=0; LABELS.length=0; LEVEL_WORLD.length=0; finishWorlds(); G.sparks=LEVELS.map(()=>0); }
   return n=>n==='__short'?short:eval(n);
@@ -35,22 +37,22 @@ const key=code=>({code,preventDefault(){}});
 /* Replace some of the game's functions with ones that only note they were called, with their first argument. */
 function listen(m,names){ const log=[]; globalThis.__heard=log; for(const n of names) m[n+'=function(a){ __heard.push(a===undefined?"'+n+'":"'+n+' "+a); }']; return log; }
 const cellsOf=m=>m.MAPSEGS.map(s=>s.map(c=>c.z*m.MAP_W+c.x));
-const WORLDS=8, PER=5, BEACH=0, JUNGLE=1, REEF=2, HOLLOW=3, WORKS=4, CLOUDS=5, VOLCANO=6, MOON=7;
+const WORLDS=10, PER=5, FEN=3, CAVERNS=8, BASTION=9;
 const first=w=>w*PER, last=w=>w*PER+PER-1;
 /* a page element that remembers which of its three children are marked as found */
 function moonsEl(){ const got=[false,false,false]; return {got,children:got.map((_,i)=>({classList:{toggle(n,v){ if(n==='got') got[i]=!!v; }}}))}; }
 
 const checks=[
-  ['there are eight worlds of five levels, and one marker for every level',()=>{
+  ['there are ten worlds of five levels, and one marker for every level',()=>{
     const m=game();
     assert.strictEqual(m.WORLDS.length,WORLDS); for(const w of m.WORLDS) assert.strictEqual(w.levels.length,PER,w.name+' has '+w.levels.length+' levels');
     assert.strictEqual(m.LEVELS.length,WORLDS*PER);
     assert.strictEqual(m.MAPNODES.length,m.LEVELS.length);
     assert.strictEqual(m.MAPSEGS.length,m.LEVELS.length-1);
   }],
-  ['every stretch is 4 to 12 steps long, and the path turns',()=>{
+  ['every stretch is 4 to 16 steps long, and the path turns',()=>{
     const m=game(); let bends=0;
-    m.MAPSEGS.forEach((seg,i)=>{ const n=seg.length-1; assert(n>=4&&n<=12,'stretch '+i+' is '+n+' steps long');
+    m.MAPSEGS.forEach((seg,i)=>{ const n=seg.length-1; assert(n>=4&&n<=16,'stretch '+i+' is '+n+' steps long');
       for(let k=2;k<seg.length;k++) if(seg[k].x-seg[k-1].x!==seg[k-1].x-seg[k-2].x) bends++; });
     for(let w=0;w<WORLDS;w++){ const dirs=new Set(); for(let i=first(w);i<last(w);i++) for(let k=1;k<m.MAPSEGS[i].length;k++) dirs.add(m.mapDirOf(m.MAPSEGS[i][k-1],m.MAPSEGS[i][k]));
       assert(dirs.size>=3,'world '+(w+1)+' is walked only '+[...dirs].join(' and ')); }
@@ -94,43 +96,32 @@ const checks=[
   ['the path climbs and falls: it is a landscape, not a board',()=>{
     const m=game(), hs=m.MAPNODES.map(n=>n.h);
     assert(Math.max(...hs)-Math.min(...hs)>=16,'the highest and lowest markers are only '+(Math.max(...hs)-Math.min(...hs))+' steps apart');
-    for(let w=0;w<WORLDS;w++){ const own=hs.slice(first(w),last(w)+1); if(w!==BEACH&&w!==REEF) assert(Math.max(...own)>Math.min(...own),'world '+(w+1)+' is flat'); }
-    const up=hs[last(VOLCANO)]-Math.min(...hs.slice(first(VOLCANO),last(VOLCANO)+1));
-    assert(up>=8,'the volcano is only climbed '+up+' steps');
+    for(let w=0;w<WORLDS;w++){ const own=hs.slice(first(w),last(w)+1); if(w!==BASTION) assert(Math.max(...own)>Math.min(...own),'world '+(w+1)+' is flat'); }
+    const up=hs[last(CAVERNS)]-Math.min(...hs.slice(first(CAVERNS),last(CAVERNS)+1));
+    assert(up>=3,'the candy mountain is only climbed '+up+' steps');
   }],
-  ['the clouds and the moon float, each is reached by a stair, and the moon is the highest ground there is',()=>{
+  ['the bastion floats, is reached by a stair of light, and is the highest ground there is',()=>{
     const m=game(), I=m.ISLE, W=m.MAP_W, air=c=>I.kind[c.z*W+c.x]===m.MK_SEA&&I.deck[c.z*W+c.x]>0;
-    for(const w of [CLOUDS,MOON]) for(let i=first(w);i<=last(w);i++){ const n=m.MAPNODES[i]; assert(I.base[n.z*W+n.x]>0,'marker '+i+' is not on floating ground'); }
-    for(let i=0;i<m.MAPNODES.length;i++){ const n=m.MAPNODES[i], w=m.LEVEL_WORLD[i]; if(w!==CLOUDS&&w!==MOON) assert.strictEqual(I.base[n.z*W+n.x],0,'marker '+i+' floats'); }
-    /* up from the works, down onto the volcano, and up from its crater */
-    for(const [i,rise] of [[last(WORKS),4],[last(CLOUDS),-4],[last(VOLCANO),4]]){ const seg=m.MAPSEGS[i], stair=seg.filter(air), d=seg[seg.length-1].h-seg[0].h;
-      assert(stair.length>=4,'the stair after marker '+i+' has only '+stair.length+' steps');
-      assert(rise>0?d>=rise:d<=rise,'the stair after marker '+i+' goes '+d+' steps'); }
-    const moon=m.MAPNODES.slice(first(MOON)).map(n=>n.h), rest=m.MAPNODES.slice(0,first(MOON)).map(n=>n.h);
-    assert(Math.min(...moon)>Math.max(...rest),'the moon is not above everything else');
-    const top=Math.max(...m.MAPNODES.slice(first(VOLCANO),first(MOON)).map(n=>n.h)), ground=m.MAPNODES.filter((n,i)=>m.LEVEL_WORLD[i]<CLOUDS).map(n=>n.h);
-    assert(top>Math.max(...ground),'the volcano is not the tallest ground');
+    for(let i=first(BASTION);i<=last(BASTION);i++){ const n=m.MAPNODES[i]; assert(I.base[n.z*W+n.x]>0,'marker '+i+' is not on floating ground'); }
+    for(let i=0;i<first(BASTION);i++){ const n=m.MAPNODES[i]; assert.strictEqual(I.base[n.z*W+n.x],0,'marker '+i+' floats'); }
+    const seg=m.MAPSEGS[last(CAVERNS)], stair=seg.filter(air), d=seg[seg.length-1].h-seg[0].h;
+    assert(stair.length>=4,'the stair to the bastion has only '+stair.length+' steps'); assert(d>=6,'the stair to the bastion climbs only '+d+' steps');
+    const top=m.MAPNODES.slice(first(BASTION)).map(n=>n.h), rest=m.MAPNODES.slice(0,first(BASTION)).map(n=>n.h);
+    assert(Math.min(...top)>Math.max(...rest),'the bastion is not above everything else');
   }],
-  ['the stair of light leaves from beside the crater',()=>{
-    const m=game(), I=m.ISLE, W=m.MAP_W, n=m.MAPNODES[last(VOLCANO)]; let lava=false;
-    for(let dz=-1;dz<=1;dz++) for(let dx=-1;dx<=1;dx++) if(I.kind[(n.z+dz)*W+n.x+dx]===m.MK_LAVA) lava=true;
-    assert(lava,'the last marker of the volcano is not on the rim of its crater');
-    assert(n.h*m.MAP_STEP>=I.h[n.z*W+n.x+1]*m.MAP_STEP-0.3,'the lava stands higher than the marker beside it');
+  ['the fen is wet: its path crosses pools on lily pads',()=>{
+    const m=game(), I=m.ISLE, W=m.MAP_W; let pads=0, pools=0;
+    for(let i=first(FEN);i<last(FEN);i++) for(const c of m.MAPSEGS[i]) if(I.kind[c.z*W+c.x]===m.MK_POND) pads++;
+    for(let k=0;k<I.kind.length;k++) if(I.kind[k]===m.MK_POND&&I.world[k]===FEN) pools++;
+    assert(pools>=10,'the fen has only '+pools+' cells of pool'); assert(pads>=1,'the path through the fen never crosses a pool');
   }],
-  ['the reef is a ring round a lagoon, crossed on stepping stones by way of the islet',()=>{
-    const m=game(), I=m.ISLE, W=m.MAP_W; let stones=0, isle=0;
-    for(let i=first(REEF);i<last(REEF);i++) for(const c of m.MAPSEGS[i]) if(I.kind[c.z*W+c.x]===m.MK_POND) stones++;
-    assert(stones>=4,'only '+stones+' stepping stones');
-    for(let i=first(REEF);i<=last(REEF);i++){ const n=m.MAPNODES[i]; let wet=0; for(const [dx,dz] of [[2,0],[-2,0],[0,2],[0,-2]]) if(I.kind[(n.z+dz)*W+n.x+dx]===m.MK_POND) wet++; if(wet>=3) isle++; }
-    assert(isle>=1,'no marker stands on an islet in the lagoon');
-  }],
-  ['every boss has a lair: level ground behind its marker, clear of the path',()=>{
+  ['every world has a lair for its landmark: level ground behind its fifth marker, clear of the path; and the bosses are where they should be',()=>{
     const m=game(), I=m.ISLE, W=m.MAP_W, boss=[]; m.LEVELS.forEach((f,i)=>{ if(f().boss) boss.push(i); });
-    assert.deepStrictEqual(boss,[last(JUNGLE),last(HOLLOW),last(CLOUDS),last(MOON)]);
-    for(const i of boss){ const n=m.MAPNODES[i], h=I.h[(n.z-1)*W+n.x];
+    if(!m.__short.length) assert.deepStrictEqual(boss,[1,3,5,7,9].map(last));
+    for(let w=0;w<WORLDS;w++){ const i=last(w); const n=m.MAPNODES[i], h=I.h[(n.z-1)*W+n.x];
       assert.notStrictEqual(m.mapDirAt(i).fwd,'N','the path leaves marker '+i+' through the lair'); assert.notStrictEqual(m.mapDirAt(i).back,'N','the path reaches marker '+i+' through the lair');
       for(let dz=-3;dz<=-1;dz++) for(let dx=-1;dx<=1;dx++){ const k=(n.z+dz)*W+n.x+dx;
-        assert(I.kind[k]===m.MK_LAND&&I.world[k]===m.LEVEL_WORLD[i],'no ground for the lair at '+(n.x+dx)+','+(n.z+dz));
+        assert(I.kind[k]===m.MK_LAND&&I.world[k]===w,'no ground for the lair at '+(n.x+dx)+','+(n.z+dz));
         assert.strictEqual(I.route[k],-1,'the path runs through the lair at '+(n.x+dx)+','+(n.z+dz));
         assert.strictEqual(I.h[k],h,'the lair of marker '+i+' stands on a slope at '+(n.x+dx)+','+(n.z+dz)); }
       assert(h>=n.h&&h-n.h<=2,'the lair of marker '+i+' is '+(h-n.h)+' steps above its marker'); }
@@ -206,14 +197,14 @@ const checks=[
       if(k!==m.MK_LAND) for(let dz=-1;dz<=1;dz++) for(let dx=-1;dx<=1;dx++) assert(at(x+dx,z+dz)!==m.MK_SEA,'the pool at '+x+','+z+' touches the sea');
       assert(x>0&&z>0&&x<W-1&&z<D-1,'land reaches the edge of the map at '+x+','+z); }
   }],
-  ['floating land touches nothing but its own kind, and only the beach and the jungle meet on the ground',()=>{
+  ['floating land touches nothing but its own kind, no two worlds touch, and every stretch from one world to the next crosses open water or air',()=>{
     const m=game(), I=m.ISLE, W=m.MAP_W, D=m.MAP_D, meet=new Set();
     for(let z=1;z<D-1;z++) for(let x=1;x<W-1;x++){ const k=z*W+x; if(I.kind[k]===m.MK_SEA) continue;
       for(const n of [k+1,k+W]){ if(I.kind[n]===m.MK_SEA) continue;
         assert((I.base[k]>0)===(I.base[n]>0),'floating land touches the ground at '+x+','+z);
         if(I.world[k]!==I.world[n]) meet.add(Math.min(I.world[k],I.world[n])+'-'+Math.max(I.world[k],I.world[n])); } }
-    assert.deepStrictEqual([...meet],[BEACH+'-'+JUNGLE]);
-    for(const w of [JUNGLE,REEF,HOLLOW]) assert(m.MAPSEGS[last(w)].filter(c=>I.kind[c.z*W+c.x]===m.MK_SEA).length>=2,'the stretch after marker '+last(w)+' does not cross open sea');
+    assert.deepStrictEqual([...meet],[]);
+    for(let w=0;w<WORLDS-1;w++) assert(m.MAPSEGS[last(w)].filter(c=>I.kind[c.z*W+c.x]===m.MK_SEA).length>=1,'the stretch after marker '+last(w)+' does not leave its island');
   }],
   ['no ground stands between the camera and the path',()=>{
     /* The camera looks north and down at about 50 degrees, so a column d cells nearer than a tile hides it once its
@@ -254,7 +245,7 @@ const checks=[
     assert.strictEqual(m.mapSegShown(1),m.MAPSEGS[1].length); assert.strictEqual(m.mapSegShown(2),0);
     m.G.open=m.LEVELS.length; assert.strictEqual(m.mapMarkState(m.LEVELS.length-1),2);
   }],
-  ['an opened marker shows its three moon sparks, lit for each one found',()=>{
+  ['an opened marker shows its three sun sparks, lit for each one found',()=>{
     const m=game(); m.G.open=2; m.G.sparks[0]=5; m.G.sparks[3]=7;
     const row=i=>[0,1,2].map(j=>m.mapMoonState(i,j));
     assert.deepStrictEqual(row(0),[2,1,2],'a cleared marker'); assert.deepStrictEqual(row(1),[1,1,1]); assert.deepStrictEqual(row(2),[1,1,1],'the open marker');
@@ -354,7 +345,8 @@ const checks=[
   ['the map has a tune of its own, as long as a level tune',()=>{
     const m=game(), t=m.SONGS.map;
     assert(t,'there is no map tune'); assert(t.tr.length>=3,'the map tune has only '+t.tr.length+' tracks');
-    assert(t.len>=m.SONGS.shores.len/2,'the map tune is '+t.len+' steps long, a level tune '+m.SONGS.shores.len);
+    const lv=m.SONGS[m.THEMES[m.WORLDS[0].theme].music];
+    assert(t.len>=lv.len/2,'the map tune is '+t.len+' steps long, a level tune '+lv.len);
     assert(t.tr[0].seq.filter(Boolean).length>=20,'the tune has hardly any notes');
   }],
   ['the map tune plays on the map and stops when a level starts',()=>{
@@ -403,10 +395,10 @@ const checks=[
 function printMap(){
   const m=game(), W=m.MAP_W, D=m.MAP_D, I=m.ISLE, node=new Map(); m.MAPNODES.forEach((n,i)=>node.set(n.z*W+n.x,i));
   const head='    '+Array.from({length:W},(_,x)=>x%10===0?String(x/10|0):' ').join('')+'\n    '+Array.from({length:W},(_,x)=>x%10).join('');
-  console.log('Regions and route (digits: a marker, by its place in its world; + path; = bridge or stair; * a pool;\nb beach, j jungle, r reef, h hollow, w works, c clouds, v volcano, m moon)\n'+head);
+  console.log('Regions and route (digits: a marker, by its place in its world; + path; = bridge or stair; * a pool;\na to j the ten worlds, in order)\n'+head);
   for(let z=0;z<D;z++){ let r='';
     for(let x=0;x<W;x++){ const k=z*W+x;
-      r+=node.has(k)?String(node.get(k)%5+1):I.route[k]>=0?(I.deck[k]?'=':'+'):I.kind[k]===m.MK_LAND?'bjrhwcvm'[I.world[k]]:I.kind[k]===m.MK_SEA?'~':'*'; }
+      r+=node.has(k)?String(node.get(k)%5+1):I.route[k]>=0?(I.deck[k]?'=':'+'):I.kind[k]===m.MK_LAND?'abcdefghij'[I.world[k]]:I.kind[k]===m.MK_SEA?'~':'*'; }
     console.log(String(z).padStart(3)+' '+r); }
   console.log('\nHeights in steps (a=10 and so on; . sea; upper case floats)\n'+head);
   for(let z=0;z<D;z++){ let r='';

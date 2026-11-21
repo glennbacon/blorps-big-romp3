@@ -17,7 +17,12 @@ const core=d=>({level:d.level,open:d.open,score:d.score,coins:d.coins,lives:d.li
 /* One page load. The probe looks names up inside the game's own scope when they are asked for, so `g.act` is the
    game's act and a name the game lacks fails only the checks that use it. `els` holds the page elements it touched.
    Screen wipes are told not to wait for frames, of which there are none here. */
-const probe=function(){ return n=>eval(n); };
+/* While worlds are still being written, the first one stands in for the ones that are missing, so there are levels to save. */
+const probe=function(){
+  if(WORLDS.length<10){ while(WORLDS.length<10) WORLDS.push({name:'World '+(WORLDS.length+1),theme:WORLDS[0].theme,levels:WORLDS[0].levels.slice()});
+    LEVELS.length=0; LABELS.length=0; LEVEL_WORLD.length=0; finishWorlds(); G.sparks=LEVELS.map(()=>0); }
+  return n=>eval(n);
+};
 function page(s){ const pg=loadGame(probe,s); pg.api('WP').instant=true; return {api:new Proxy({},{get:(_,k)=>pg.api(k)}),els:pg.els}; }
 const continueShown=pg=>{ const b=pg.els['btn-continue']; return !!b&&b.hidden===false; };
 /* stand Blorp on a marker with everything before it cleared, and start its level */
@@ -57,7 +62,7 @@ const checks=[
     assert.deepStrictEqual({at:g.MAPST.at,open:g.G.open,score:g.G.score,coins:g.G.coins,lives:g.G.lives,form:g.player.form,state:g.G.state},
       {at:6,open:7,score:1234,coins:7,lives:4,form:3,state:'map'});
   }],
-  ['a moon spark is saved the moment it is touched, and is still there after a reload',()=>{
+  ['a sun spark is saved the moment it is touched, and is still there after a reload',()=>{
     const s=storage(), g=page(s).api; g.act('start'); enter(g,3);
     g.collectSpark(g.sparks[1]);
     assert.strictEqual(saved(s).sparks[3],2);

@@ -316,7 +316,7 @@ defEnemy('shade',{w:0.6,h:0.9,fly:true,heavy:true,fireproof:true, init(e,d){ e.h
 
 /* ---------- bosses ---------- */
 function bossInit(e,d){ e.w=2.2; e.h=2.4; e.hp=d.hp||9; e.hp0=e.hp; e.inv=0; e.x0=d.x0; e.x1=d.x1; e.t=0; e.st='walk'; e.stT=2; e.n=0; e.vx=0; e.dir=-1; }
-const BOSS_NAMES={bongo:'Big Bongo',boohoo:'Count Boohoo',zappa:'Lord Zappa',queen:'Queen Grizzle',apple:'Granny Smash',croak:'King Croak',razzle:'Ringmaster Razzle',wokbot:'Wokbot 3000',baron:'Baron Blackout'};
+const BOSS_NAMES={apple:'Granny Smash',croak:'King Croak',razzle:'Ringmaster Razzle',wokbot:'Wokbot 3000',baron:'Baron Blackout'};
 /* what the clear screen says once each is beaten */
 const BOSS_LINES={apple:'Granny Smash rolls off down the hill, and a jar of sun sparks rolls out of her basket.',croak:'King Croak hiccups up a jar of sun sparks and sinks under the lilies.',
   razzle:'The Ringmaster bows, drops a jar of sun sparks, and is shot out of his own cannon.',wokbot:'Wokbot 3000 boils over. In the pot, among the noodles: a jar of sun sparks.',baron:'The Baron is beaten, and the sun is free.'};
@@ -343,63 +343,6 @@ function bossMove(e,dt){
 }
 const bossBlink=(e,m,time)=>{ m.visible=!(e.inv>0&&((time*24|0)%2)); };
 const bossMesh=(key,f,scale)=>()=>{ const g=new T.Group(), m=vmesh(key,f); m.scale.setScalar(scale||2.2); g.add(m); return g; };
-/* Big Bongo: strolls up, then by turns leaps (the landing sends ripples along the ground) and charges (and stuns
-   himself on the wall). */
-defEnemy('bongo',{boss:true,heavy:true,init:bossInit,mesh:bossMesh('bongo',mBossBongo),
-  tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0; e.inv=Math.max(0,e.inv-dt); e.stT-=dt;
-    if(e.st==='walk'){ if(e.onGround) e.vx+=((p.x<e.x?-1:1)*(1.5+rage*1.3)-e.vx)*Math.min(1,dt*3);
-      if(e.stT<=0&&e.onGround){ if(e.n++%2===0){ e.st='leap'; e.vy=16+rage*2; e.vx=clamp((p.x-e.x)/1.0,-7,7); e.onGround=false; } else { e.st='wind'; e.stT=0.75; e.vx=0; e.dir=p.x<e.x?-1:1; sfx.bossRoar(); } } }
-    else if(e.st==='wind'){ if(e.stT<=0){ e.st='charge'; e.vx=e.dir*(8+rage*3); } }
-    else if(e.st==='dizzy'){ e.vx=0; if(e.stT<=0){ e.st='walk'; e.stT=1.2; } }
-    const thud=bossMove(e,dt);
-    if(e.st==='leap'&&e.onGround){ e.st='walk'; e.stT=1.7-rage*0.7; e.vx=0; if(thud) shockwave(e.x,e.y); }
-    else if(e.st==='charge'){ if(e.wall){ e.st='dizzy'; e.stT=1.7; e.vx=0; shake(0.35); sfx.thud(); } else if(Math.random()<dt*24) dust(e.x-e.dir,e.y,1,-e.dir); } },
-  anim(e,m,dt,time){ m.rotation.y=(e.st==='charge'||e.st==='wind'?e.dir:(player.x>e.x?1:-1))*0.8; m.rotation.z=e.st==='dizzy'?Math.sin(time*7)*0.22:e.onGround?Math.sin(time*8)*0.05:0; m.rotation.x=e.st==='wind'?0.3:0; bossBlink(e,m,time); }});
-/* Count Boohoo: fades out and drifts over Blorp, where nothing can touch him; then shows himself, swoops low across the
-   room, and sits winded on the floor for a moment. That is when to jump on him. */
-defEnemy('boohoo',{boss:true,heavy:true,fly:true,
-  init(e,d){ bossInit(e,d); e.st='fade'; e.stT=2.4; e.y=7; e.alpha=0.3; },
-  mesh(){ const g=new T.Group(), mat=new T.MeshLambertMaterial({vertexColors:true,transparent:true,emissive:0x444466}); const m=new T.Mesh(geo('boohoo',mBossBoohoo),mat); m.scale.setScalar(2.4); g.add(m); g.userData.mat=mat; return g; },
-  box:e=>e.st==='fade'?null:[e.y,e.h],
-  tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0; e.inv=Math.max(0,e.inv-dt); e.stT-=dt;
-    if(e.st==='fade'){ const tx=clamp(p.x+(e.n%2?4:-4),e.x0,e.x1); e.x+=clamp(tx-e.x,-1,1)*4*dt; e.y+=(7.2-e.y)*Math.min(1,dt*3);
-      if(rage>0.3&&Math.random()<dt*(0.5+rage)) throwAt(e.x,e.y,(Math.random()-0.5)*3,0,mEmber,'wisp',{g:5,r:0.35,glow:true,col:'#9fd0ff',scale:0.6});
-      if(e.stT<=0){ e.st='aim'; e.stT=0.7; sfx.ghost(); } }
-    else if(e.st==='aim'){ if(e.stT<=0){ e.st='swoop'; e.stT=0; e.sx=e.x; e.ex=clamp(p.x+(p.x-e.x>0?1:-1)*5,e.x0,e.x1); e.sy=e.y; } }
-    else if(e.st==='swoop'){ const u=Math.min(1,-e.stT/(1.5-rage*0.4)), k=2*u-1; e.x=lerp(e.sx,e.ex,u); e.y=2+(e.sy-2)*k*k*(u<0.5?1:0.25); if(u>=1){ e.st='tired'; e.stT=1.8-rage*0.5; e.n++; } }
-    else if(e.st==='tired'){ e.y+=(2-e.y)*Math.min(1,dt*6); if(e.stT<=0){ e.st='fade'; e.stT=2.2-rage; } } },
-  hurt(e){ e.st='fade'; e.stT=1.6; },
-  anim(e,m,dt,time){ const a=e.st==='fade'?0.28:1; e.alpha+=(a-e.alpha)*Math.min(1,dt*6); m.userData.mat.opacity=e.alpha; m.position.y=e.y+(e.st==='tired'?0:Math.sin(time*3)*0.15);
-    m.rotation.y=(player.x>e.x?1:-1)*0.6; m.rotation.z=e.st==='tired'?Math.sin(time*8)*0.15:e.st==='aim'?Math.sin(time*40)*0.05:0; bossBlink(e,m,time); }});
-/* Lord Zappa: rides high where Blorp cannot reach, calls down three bolts, then sinks low to gloat. */
-defEnemy('zappa',{boss:true,heavy:true,fly:true,
-  init(e,d){ bossInit(e,d); e.st='hover'; e.y=8.6; e.w=2.6; e.h=2; },
-  mesh:bossMesh('zappa',mBossZappa,2.6),
-  tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0; e.inv=Math.max(0,e.inv-dt); e.stT-=dt;
-    if(e.st==='walk') e.st='hover';
-    if(e.st==='hover'){ e.x+=clamp(p.x-e.x,-1,1)*(3+rage*2)*dt; e.x=clamp(e.x,e.x0,e.x1); e.y+=(8.6-e.y)*Math.min(1,dt*3); if(e.stT<=0){ e.st='charge'; e.stT=0.9; e.cols=[p.x,p.x-3,p.x+3].concat(rage>0.5?[p.x-6,p.x+6]:[]); } }
-    else if(e.st==='charge'){ for(const c of e.cols) if(Math.random()<dt*30) spawnPart(c+(Math.random()-0.5)*0.5,2.1,0.2,'#ffe14d',0,2+Math.random()*2,0,0.3,0.1,0,true);
-      if(e.stT<=0){ for(const c of e.cols) throwAt(c,11,0,-17,mBolt,'bolt',{g:0,r:0.34,glow:true,col:'#ffe14d',scale:1.5}); sfx.zap(); flash(0.3); e.st='dive'; e.stT=3.2-rage; } }
-    else if(e.st==='dive'){ const low=e.stT<2.4-rage*0.6; e.y+=((low?2.2:8.6)-e.y)*Math.min(1,dt*(low?2.5:3)); if(low) e.x+=clamp(p.x-e.x,-1,1)*1.6*dt; if(e.stT<=0){ e.st='hover'; e.stT=1.6-rage*0.6; } } },
-  hurt(e){ e.st='hover'; e.stT=1.2; },
-  anim(e,m,dt,time){ const k=e.st==='charge'?1+Math.sin(time*50)*0.05:1; m.scale.setScalar(k); m.position.y=e.y+Math.sin(time*2.5)*0.12; m.rotation.y=(player.x>e.x?1:-1)*0.4; if(e.st==='charge') glowAt(e.x,e.y,1,0xffe14d,1.6,9); bossBlink(e,m,time); }});
-/* Queen Grizzle: three moods. She begins as her brother fought, walking, hopping and lobbing bombs; hurt, her landings
-   send ripples; cornered, she charges as well and throws three bombs at a time. */
-defEnemy('queen',{boss:true,heavy:true,init(e,d){ bossInit(e,d); e.jumpT=2.2; e.throwT=1.6; },mesh:bossMesh('queen',mBossQueen),
-  tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0, mood=rage<0.34?0:rage<0.67?1:2; e.inv=Math.max(0,e.inv-dt); e.stT-=dt;
-    if(e.st==='walk'){
-      if(e.onGround){ e.vx+=((p.x<e.x?-1:1)*(1.5+rage*1.7)-e.vx)*Math.min(1,dt*3);
-        e.jumpT-=dt; if(e.jumpT<=0){ if(mood===2&&e.n++%3===2){ e.st='wind'; e.stT=0.7; e.vx=0; e.dir=p.x<e.x?-1:1; sfx.bossRoar(); } else { e.vy=13+rage*3; e.onGround=false; } e.jumpT=2.5-rage+Math.random()*0.7; } }
-      e.throwT-=dt; if(e.throwT<=0&&Math.abs(p.x-e.x)<15&&!p.dead){ e.throwT=2.9-rage*1.3;
-        for(const k of (mood===2?[-3,0,3]:[0])) throwAt(e.x,e.y+e.h,clamp((p.x-e.x)/1.05+k,-9,9),11,mBomb,'bomb',{scale:1.15}); sfx.fire(); } }
-    else if(e.st==='wind'){ if(e.stT<=0){ e.st='charge'; e.vx=e.dir*10; } }
-    else if(e.st==='dizzy'){ e.vx=0; if(e.stT<=0) e.st='walk'; }
-    const thud=bossMove(e,dt);
-    if(thud&&mood>0&&e.st==='walk') shockwave(e.x,e.y);
-    if(e.st==='charge'&&e.wall){ e.st='dizzy'; e.stT=1.4; shake(0.35); sfx.thud(); } },
-  anim(e,m,dt,time){ m.rotation.y=(e.st==='charge'||e.st==='wind'?e.dir:(player.x>e.x?1:-1))*0.75; m.rotation.z=e.st==='dizzy'?Math.sin(time*7)*0.2:e.onGround?Math.sin(time*8)*0.05:0; m.rotation.x=e.st==='wind'?0.3:0; bossBlink(e,m,time); }});
-
-/* ---------- the third game's bosses ---------- */
 /* A boss is fought in an arena: flat floor from x0 to x1, walls at both ends at least four tiles high, and nothing over
    it for nine tiles. Each takes a stomp when it is open to one; `spiky` says that just now it is not. */
 const bossStars=(e,time)=>{ if(Math.random()<0.25) spawnPart(e.x+Math.cos(time*6)*1.1,e.y+e.h+0.3,Math.sin(time*6)*0.8,'#ffe14d',0,0,0,0.25,0.11,0,true); };
