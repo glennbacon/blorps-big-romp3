@@ -330,7 +330,7 @@ for(const l of picked){
   }
   const ok=res.every(r=>r.ok)&&sh.every(r=>r.ok)&&!notes.length; if(!ok) bad++;
   const cell=r=>r.ok?(r.time.toFixed(0)+'s').padStart(5):' FAIL';
-  console.log((ok?'ok  ':'FAIL')+' '+l.label.padEnd(4)+l.name.padEnd(20)+' small '+cell(res[0])+'  big '+cell(res[1])+(sh.length?'  sparks '+sh.map(r=>r.ok?'*':'x').join(''):''));
+  console.log((ok?'ok  ':'FAIL')+' '+l.label.padEnd(5)+l.name.padEnd(20)+' small '+cell(res[0])+'  big '+cell(res[1])+(sh.length?'  sparks '+sh.map(r=>r.ok?'*':'x').join(''):''));
   for(const n of notes) console.log('       '+n);
   res.forEach((r,i)=>{ if(!r.ok) console.log('       '+(i?'big':'small')+' Blorp: '+r.why); });
   sh.forEach((r,i)=>{ if(!r.ok) console.log('       spark '+(i+1)+': '+r.why); });
