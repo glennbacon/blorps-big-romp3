@@ -141,10 +141,10 @@ function harness(){
     const stand=()=>{
       const b=boss?bossOf():null, hp=b?b.hp:0, k=(player.x|0)+'_'+Math.round(player.y*2)+'_'+hp+(swOn?'':'s');
       let c=cells.get(k);
-      if(!c){ const d=dist(player.x,player.y+0.5); c={x:player.x,y:player.y,d,hp,near:b&&G.bossSeen?Math.abs(player.x-b.x):0,snaps:[snap()],n:0}; cells.set(k,c); list.push(c); if(d<best) best=d; }
+      if(!c){ const d=dist(player.x,player.y+0.5); c={x:player.x,y:player.y,d,hp,seen:!!(b&&G.bossSeen),near:b?Math.abs(player.x-b.x):0,snaps:[snap()],n:0}; cells.set(k,c); list.push(c); if(d<best) best=d; }
       else if(c.snaps.length<3&&simT-c.snaps[c.snaps.length-1].time>1.5) c.snaps.push(snap());
     };
-    const score=c=>-c.hp*1000+(boss&&c.near?-c.near-200:-c.d);
+    const score=c=>-c.hp*1000+(c.seen?300-c.near:-c.d); /* once the boss is up, a spot in the fight beats any spot on the way to it */
     const choose=()=>{
       const r=rnd();
       if(r<0.62&&front.length) return front[(rnd()*front.length)|0];
