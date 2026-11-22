@@ -1707,7 +1707,7 @@ const matCache={};
 /* the textured materials of a theme. A look may repaint the ground or the blocks, so they are kept per palette, not per theme. */
 function themeMats(c){
   const st=c.sticky||HONEY, bo=c.bounce||{kind:'jelly'};
-  const key=[c.top,c.dirt,c.cap,c.capD,c.brick[0],c.hard[0],c.semi,c.stone?1:0,bo.kind].concat(c.topS,c.dirtS,st,bo.cols||[],c.semiCols||[]).join();
+  const key=[c.top,c.dirt,c.cap,c.capL,c.capD,c.semi,c.stone?1:0,bo.kind].concat(c.brick,c.hard,c.topS,c.dirtS,st,bo.cols||[],c.semiCols||[]).join();
   if(matCache[key]) return matCache[key];
   const bT=BM(texBounce(bo,0)), bS=BM(texBounce(bo,1));
   return matCache[key]={ gTop:LM(texTop(c)), gSide:LM(texSide(c)), gDirt:LM(texDirt(c)), gUnder:LM(texUnder(c)), hard:LM(texHard(c.hard)),
