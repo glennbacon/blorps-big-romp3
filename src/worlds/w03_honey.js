@@ -94,7 +94,7 @@ function honeyWall(S,R,x0,x1,y0,y1,z){
   for(let j=0,y=y0;y+1.95<=y1;y+=ch,j++) for(let x=x0+(j%2?cw/2:0);x+cw<=x1;x+=cw){
     const r=R();
     if(r<0.17){ const c=r<0.09?'#f6d98a':'#eec66a'; far.push([x+0.65,y+0.04,z,1.1,1.86,0.28,c],[x+0.14,y+0.47,z,2.12,1,0.28,c]); }
-    else if(r<0.27){ glow.push([x+0.65,y+0.04,z,1.1,1.86,0.07,'#ffb428'],[x+0.14,y+0.47,z,2.12,1,0.07,r<0.22?'#ffb428':'#ffc64a']); }
+    else if(r<0.23){ glow.push([x+0.65,y+0.04,z,1.1,1.86,0.07,'#f0a01c'],[x+0.14,y+0.47,z,2.12,1,0.07,r<0.2?'#f0a01c':'#f7b436']); }
     else { const c=r<0.66?'#8a4f14':'#7a4410'; far.push([x+0.65,y+0.04,z,1.1,1.86,0.05,c],[x+0.14,y+0.47,z,2.12,1,0.05,c]); }
   }
 }
@@ -116,7 +116,7 @@ function honeyBees(R,n,x0,x1,y0,y1){
 const honeyIn={inside:true, air:'hum', back:-3.4, fringe:null, cloud:0, spokes:0, rays:0,
   top:'#eebf52', topS:['#f6cc66','#e2b044','#f2c65c','#ffd97a'], dirt:'#b97a2c', dirtS:['#a96c24','#c98a38','#9a5e1c'], cap:'#eebf52', capL:'#fff0a8', capD:'#8a5210',
   sky:['#5a3410','#b8741e','#ffc24a'], fog:0xc98a2a, fogNear:16, fogFar:110, hemiSky:0xffe6b0, hemiGround:0xc98a3a, hemiI:0.6, sunI:0.55, sunCol:0xffd08a, sunDir:[-0.4,0.8,0.5],
-  glowCol:0xffc24a, sunGlow:0.4, bloom:1, hi:0.22, grade:{shadow:[1.05,0.95,0.84],high:[1.08,1.01,0.9]}};
+  glowCol:0xffc24a, sunGlow:0.4, bloom:0.72, hi:0.26, grade:{shadow:[1.05,0.95,0.84],high:[1.08,1.01,0.9]}};
 
 THEMES.honey={ music:'honey', air:'birds',
   sky:['#3f9cf0','#a8dcff','#fff6cf'], skyMid:0.52, glowCol:0xfff1b0, sunGlow:0.9, cloud:0.45, cloudShade:'#ffe9b8', cloudY:0.66, spokes:0.45,

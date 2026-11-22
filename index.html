@@ -4156,7 +4156,7 @@ function honeyWall(S,R,x0,x1,y0,y1,z){
   for(let j=0,y=y0;y+1.95<=y1;y+=ch,j++) for(let x=x0+(j%2?cw/2:0);x+cw<=x1;x+=cw){
     const r=R();
     if(r<0.17){ const c=r<0.09?'#f6d98a':'#eec66a'; far.push([x+0.65,y+0.04,z,1.1,1.86,0.28,c],[x+0.14,y+0.47,z,2.12,1,0.28,c]); }
-    else if(r<0.27){ glow.push([x+0.65,y+0.04,z,1.1,1.86,0.07,'#ffb428'],[x+0.14,y+0.47,z,2.12,1,0.07,r<0.22?'#ffb428':'#ffc64a']); }
+    else if(r<0.23){ glow.push([x+0.65,y+0.04,z,1.1,1.86,0.07,'#f0a01c'],[x+0.14,y+0.47,z,2.12,1,0.07,r<0.2?'#f0a01c':'#f7b436']); }
     else { const c=r<0.66?'#8a4f14':'#7a4410'; far.push([x+0.65,y+0.04,z,1.1,1.86,0.05,c],[x+0.14,y+0.47,z,2.12,1,0.05,c]); }
   }
 }
@@ -4178,7 +4178,7 @@ function honeyBees(R,n,x0,x1,y0,y1){
 const honeyIn={inside:true, air:'hum', back:-3.4, fringe:null, cloud:0, spokes:0, rays:0,
   top:'#eebf52', topS:['#f6cc66','#e2b044','#f2c65c','#ffd97a'], dirt:'#b97a2c', dirtS:['#a96c24','#c98a38','#9a5e1c'], cap:'#eebf52', capL:'#fff0a8', capD:'#8a5210',
   sky:['#5a3410','#b8741e','#ffc24a'], fog:0xc98a2a, fogNear:16, fogFar:110, hemiSky:0xffe6b0, hemiGround:0xc98a3a, hemiI:0.6, sunI:0.55, sunCol:0xffd08a, sunDir:[-0.4,0.8,0.5],
-  glowCol:0xffc24a, sunGlow:0.4, bloom:1, hi:0.22, grade:{shadow:[1.05,0.95,0.84],high:[1.08,1.01,0.9]}};
+  glowCol:0xffc24a, sunGlow:0.4, bloom:0.72, hi:0.26, grade:{shadow:[1.05,0.95,0.84],high:[1.08,1.01,0.9]}};
 
 THEMES.honey={ music:'honey', air:'birds',
   sky:['#3f9cf0','#a8dcff','#fff6cf'], skyMid:0.52, glowCol:0xfff1b0, sunGlow:0.9, cloud:0.45, cloudShade:'#ffe9b8', cloudY:0.66, spokes:0.45,
@@ -4654,28 +4654,28 @@ THEMES.fen={ music:'fen', air:'frogs',
   semi:'fenboard', plat:['#6fc45a','#2f8a48'], dust:'#cfe8c0', back:-5.5, fringe:['#6fae4a','#4f8a3a','#8cc468','#5a9448'],
   liquid:{kind:'water',a:'#0f4a50',b:'#a8f0d8',op:0.84,far:60,mirror:0.78,glint:'#d8ffe0',flow:0.45}, pool:{kind:'water',a:'#1a6a68',b:'#b8f5e0',op:0.6,mirror:0.3,flow:0.5},
   bounce:{kind:'cap',cols:['#3fd6c0','#b8fff0','#1a8a80']}, bounceCol:'#b8fff0', sticky:['#6b4a30','#8f6c48','#3a2618'], stickyCol:'#6b4a30', geyser:['#b6f08a','#ecffd0'],
-  disc:['#fff6c8','#fffbe6','#c9bf8a'], discX:0.6, bloom:1, hi:0.16, rays:0.3, dof:0.5, grade:{shadow:[0.92,1.0,1.05],high:[1.06,1.03,0.92]}, wispCol:0xb6ff8a,
+  disc:['#f2e4a4','#fff6d0','#8f8450'], discX:0.6, bloom:1, hi:0.16, rays:0.3, dof:0.5, grade:{shadow:[0.92,1.0,1.05],high:[1.06,1.03,0.92]}, wispCol:0xb6ff8a,
   skins:{ribbit:fenFrog,buzz:fenMozzie,wisp:fenWisp},
   fenMoon:9.5, fenCols:{far:'#2f6652',leaf:['#3a7a4a','#2f6a44','#4a8a50'],moss:'#9fb88a',mist:'#c4e4bc',bark:['#6b4a38','#4a3226'],pads:['#4f9a5a','#3f8a50','#5fae62'],deep:'#0a2e36'},
   looks:[null,
     /* 2: violet twilight */
     {sky:['#2a1c62','#7a4f9e','#f2a49c'],skyMid:0.5,fog:0x7a68a0,hemiSky:0xe0d0ff,hemiGround:0x4a4a78,hemiI:0.58,sunI:0.5,sunCol:0xffc0b0,sunDir:[-0.66,0.42,0.5],glowCol:0xffd0c0,sunGlow:0.6,stars:0.35,
-      cloud:0.45,cloudCol:'#f0b0c0',cloudShade:'#7a5a9a',disc:['#fff0e0','#fff8f0','#c9a8c0'],discX:-0.55,fenMoon:8.5,
+      cloud:0.45,cloudCol:'#f0b0c0',cloudShade:'#7a5a9a',disc:['#f0d6cc','#ffeee6','#8f6c88'],discX:-0.55,fenMoon:8.5,
       liquid:{kind:'water',a:'#221a52',b:'#f0c0e0',op:0.84,far:60,mirror:0.8,glint:'#ffd8f0',flow:0.45},grade:{shadow:[0.96,0.92,1.1],high:[1.07,1.0,0.98]},
       fenCols:{far:'#3c3a74',leaf:['#2f6a5c','#285a54','#3a7a64'],moss:'#a8a8c8',mist:'#cbb8ea',bark:['#5a4048','#3a2a34'],pads:['#3f8a66','#347a5c','#4a9a70'],deep:'#141240'}},
     /* 3: night, the moon up */
     {sky:['#060a22','#12264a','#2f5a66'],skyMid:0.5,fog:0x16343f,fogNear:12,fogFar:105,hemiSky:0x9fc0e8,hemiGround:0x1f3a40,hemiI:0.56,sunI:0.5,sunCol:0xbfd8ff,sunDir:[-0.5,0.6,0.45],glowCol:0xcfe6ff,sunGlow:0.6,
-      stars:0.8,shoot:1,cloud:0.25,cloudCol:'#2f5a70',cloudShade:'#16303f',air:'crickets',lit:true,disc:['#f4f8ff','#ffffff','#a8b8d8'],discX:0.7,fenMoon:10,darkAmb:0x1c2a44,rays:0.25,
+      stars:0.8,shoot:1,cloud:0.25,cloudCol:'#2f5a70',cloudShade:'#16303f',air:'crickets',lit:true,disc:['#d6e0f2','#f0f6ff','#6a7ea6'],discX:0.7,fenMoon:10,darkAmb:0x1c2a44,rays:0.25,
       liquid:{kind:'water',a:'#082a3a',b:'#8fd8e8',op:0.86,far:60,mirror:0.8,glint:'#cfeeff',flow:0.4},grade:{shadow:[0.9,0.98,1.12],high:[1.02,1.03,1.0]},
       fenCols:{far:'#10303c',leaf:['#1f4f48','#1a443e','#27594e'],moss:'#6f9a9a',mist:'#4f7f92',bark:['#3f3038','#2a2028'],pads:['#2f7a5a','#286a50','#3a8a62'],deep:'#04121c'}},
     /* 4: deeper night: the moon behind the trees, swamp light in the sky */
     {sky:['#04061a','#0c1a3a','#1f4a4a'],skyMid:0.46,fog:0x10262f,fogNear:11,fogFar:95,hemiSky:0x8fb0d8,hemiGround:0x1a3038,hemiI:0.52,sunI:0.42,sunCol:0xb0ccff,sunDir:[-0.4,0.66,0.45],glowCol:0xb6ffd0,sunGlow:0.45,
-      stars:0.9,shoot:1,cloud:0.3,cloudCol:'#28506a',cloudShade:'#122838',neb:['#1f8a6a','#5a3fa0'],nebI:0.4,air:'crickets',lit:true,disc:['#e8fff0','#f4fff8','#98c0b0'],discX:-0.75,fenMoon:6.5,darkAmb:0x18263e,rays:0.2,
+      stars:0.9,shoot:1,cloud:0.3,cloudCol:'#28506a',cloudShade:'#122838',neb:['#1f8a6a','#5a3fa0'],nebI:0.4,air:'crickets',lit:true,disc:['#c8ecd8','#e6fff0','#5e9080'],discX:-0.75,fenMoon:6.5,darkAmb:0x18263e,rays:0.2,
       liquid:{kind:'water',a:'#06222e',b:'#7fd0c8',op:0.87,far:60,mirror:0.82,glint:'#c0f4e0',flow:0.4},grade:{shadow:[0.88,0.98,1.12],high:[1.0,1.04,1.0]},
       fenCols:{far:'#0c2630',leaf:['#1a443e','#163a36','#215046'],moss:'#5f8a8a',mist:'#3f6f80',bark:['#372a32','#241c24'],pads:['#286a50','#225c46','#327a5a'],deep:'#030e16'}},
     /* 5: the King's night: a great green-gold moon */
     {sky:['#04120e','#0f3528','#4a7a3a'],skyMid:0.5,fog:0x143a2c,fogNear:12,fogFar:100,hemiSky:0xb0e0b8,hemiGround:0x1f3a30,hemiI:0.56,sunI:0.5,sunCol:0xe0ffc0,sunDir:[-0.3,0.66,0.5],glowCol:0xe8ffb0,sunGlow:0.85,
-      stars:0.6,cloud:0.3,cloudCol:'#3a6a4a',cloudShade:'#16382a',air:'crickets',lit:true,disc:['#f2ffb8','#fbffe0','#a8c070'],discX:0.15,fenMoon:10.5,darkAmb:0x1e3030,rays:0.35,
+      stars:0.6,cloud:0.3,cloudCol:'#3a6a4a',cloudShade:'#16382a',air:'crickets',lit:true,disc:['#dcec98','#f6ffd0','#74904a'],discX:0.15,fenMoon:10.5,darkAmb:0x1e3030,rays:0.35,
       liquid:{kind:'water',a:'#08301f',b:'#b8f0a8',op:0.86,far:60,mirror:0.82,glint:'#e0ffc0',flow:0.4},grade:{shadow:[0.9,1.02,1.04],high:[1.04,1.05,0.94]},
       fenCols:{far:'#0f3024',leaf:['#1f4f3a','#1a4432','#27593f'],moss:'#7fa080',mist:'#4f8a6a',bark:['#3f3028','#2a2018'],pads:['#2f7a4a','#286a40','#3a8a52'],deep:'#04140e'}}],
   /* the far view: a shore of cypress crowns against the sky; islands in the middle distance, each with its trees
