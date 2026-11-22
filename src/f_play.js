@@ -235,7 +235,7 @@ function poundLand(){
   const p=player, ty=Math.floor(p.y-0.5), txl=Math.floor(p.x-p.w/2+0.05), txr=Math.floor(p.x+p.w/2-0.05); let broke=0, any=0;
   for(let tx=txl;tx<=txr;tx++){ const id=tileAt(tx,ty); if(id===BRICK||id===QBLOCK||id===SWITCH||id===CRUMBLE){ any++; if(bumpBlock(tx,ty,true)) broke++; } }
   if(broke&&broke===any&&!solidAt(txl,ty)&&!solidAt(txr,ty)){ p.vy=-16; return true; }
-  p.pound=0; p.poundT=0.16; p.squash=1.6; sfx.poundLand(); shake(0.28); ring(p.x,p.y,'#ffffff',2.6,0.35); ripple(p.x,p.y,0.014,0.34,0.45); dust(p.x-0.4,p.y,4,-1); dust(p.x+0.4,p.y,4,1);
+  p.pound=0; p.poundT=0.16; p.squash=1.6; sfx.poundLand(); shake(0.28); ring(p.x,p.y,'#ffffff',2.6,0.35); ripple(p.x,p.y,0.02,0.36,0.45); dust(p.x-0.4,p.y,4,-1); dust(p.x+0.4,p.y,4,1);
   for(const e of enemies){ if(!e.active||e.dead||e.gone||e.K.heavy||e.K.fly||!e.onGround) continue;
     if(Math.abs(e.x-p.x)<2.3&&Math.abs(e.y-p.y)<0.8){ if(e.K.stomp||e.K.flip){ killEnemy(e,'flip',sgn(e.x-p.x)); comboScore(e.x,e.y+e.h); } else { e.vy=7; e.onGround=false; } } }
   return false;
@@ -407,7 +407,7 @@ function collectSpark(s){
   const n=sparks.filter(q=>q.got||q.had).length;
   if(!s.had){ G.sparks[G.levelIdx]=(G.sparks[G.levelIdx]|0)|(1<<s.i); addScore(2000,s.x,s.y+0.6); writeSave(G.levelIdx); }
   sfx.spark(clamp(n,1,3)); musicDuck(n>=3?1.4:0.7); popup(s.x,s.y+1.3,n>=3?'All 3 sun sparks!':'Sun spark '+n+' of 3','#fff3a0');
-  sparkle(s.x,s.y,'#fff3a0',16,5,0.13); sparkle(s.x,s.y,'#ffffff',8,3,0.09); ring(s.x,s.y,'#ffe14d',2.4,0.5,true); flash(0.1); ripple(s.x,s.y,0.008,0.3,0.5);
+  sparkle(s.x,s.y,'#fff3a0',16,5,0.13); sparkle(s.x,s.y,'#ffffff',8,3,0.09); ring(s.x,s.y,'#ffe14d',2.4,0.5,true); flash(0.1); ripple(s.x,s.y,0.012,0.3,0.5);
   if(n>=3) confetti(s.x,s.y+0.5,30,7);
 }
 

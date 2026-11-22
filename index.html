@@ -1368,8 +1368,8 @@ SONGS.baron=(()=>{
 })();
 /* secret coin rooms: sixteen giddy bars of A major, all running eighths and hand claps, over before you know it and round again */
 SONGS.bonus=(()=>{
-  const a='A5 C#6 E6 A6 E6 C#6 E6 .  A6 . A6 . G#6 E6 C#6 .  D6 F#6 A6 F#6 D6 F#6 A6 .  B6 . A6 . F#6 D6 A5 .  E6 G#6 B6 G#6 E6 G#6 B6 .  E6 . D6 . B5 G#5 E5 .  A5 . C#6 . E6 . A6 .  G#6 E6 B5 E6 G#6 B6 . . ';
-  const a2='F#6 . A6 . D6 . F#6 A6  D7 - A6 . F#6 - . .  E6 . A6 . C#6 . E6 A6  C#7 - A6 . E6 - . .  D6 . F#6 . B5 . D6 F#6  E6 G#6 B6 E7 . B6 G#6 .  A6 . E6 C#6 A5 . C#6 E6  A6 . . . A5 . . . ';
+  const a='A4 C#5 E5 A5 E5 C#5 E5 .  A5 . A5 . G#5 E5 C#5 .  D5 F#5 A5 F#5 D5 F#5 A5 .  B5 . A5 . F#5 D5 A4 .  E5 G#5 B5 G#5 E5 G#5 B5 .  E5 . D5 . B4 G#4 E4 .  A4 . C#5 . E5 . A5 .  G#5 E5 B4 E5 G#5 B5 . . ';
+  const a2='F#5 . A5 . D5 . F#5 A5  D6 - A5 . F#5 - . .  E5 . A5 . C#5 . E5 A5  C#6 - A5 . E5 - . .  D5 . F#5 . B4 . D5 F#5  E5 G#5 B5 E6 . B5 G#5 .  A5 . E5 C#5 A4 . C#5 E5  A5 . . . A4 . . . ';
   const ch='A A D D E E A E  D D A A Bm E A A';
   return song({key:'A major',bpm:182},
     [{w:'square',v:0.055,g:0.7,e:1},a+a2],
@@ -2117,7 +2117,9 @@ const fxCube=voxGeo([[-0.5,-0.5,-0.5,1,1,1,WHITE]],1);
 /* materials of their own: three.js builds one shader for a material that is drawn with a colour for each copy and another
    for one that is not, and must never be asked to use the wrong one */
 const fxLit=new T.InstancedMesh(fxCube,voxMat(),FX_MAX), fxGlow=new T.InstancedMesh(fxCube,new T.MeshBasicMaterial({vertexColors:true,opacity:0}),FX_MAX);
-for(const m of [fxLit,fxGlow]){ m.frustumCulled=false; m.count=0; fx.add(m); }
+/* The colours are asked for here, while the mesh still counts every bit it can hold: three.js makes room for as many
+   colours as the mesh counts at the first asking, and a mesh that counted none would get none, and draw nothing. */
+for(const m of [fxLit,fxGlow]){ m.setColorAt(0,new T.Color(1,1,1)); m.frustumCulled=false; m.count=0; fx.add(m); }
 fxLit.castShadow=true;
 function spawnPart(x,y,z,col,vx,vy,vz,life,size,grav,glow,o){
   let p=null; for(const q of PARTS) if(q.life<=0){ p=q; break; }
@@ -2132,7 +2134,7 @@ function burst(x,y,col,n,spd,size,life,glow){
 }
 /* a low puff of dust that drifts and settles: landing, skidding, sliding down a wall */
 function dust(x,y,n,dir,col){
-  for(let i=0;i<n;i++) spawnPart(x+(Math.random()-0.5)*0.4,y+0.08+Math.random()*0.1,0.3+Math.random()*0.5,col||TH.dust||'#ffffff',(dir||0)*(1+Math.random()*1.5)+(Math.random()-0.5)*1.6,0.6+Math.random()*1.4,(Math.random()-0.5)*1.2,0.3+Math.random()*0.25,0.09+Math.random()*0.08,3,false,{grow:1.9,drag:2.5,spin:2});
+  for(let i=0;i<n;i++) spawnPart(x+(Math.random()-0.5)*0.4,y+0.08+Math.random()*0.1,0.3+Math.random()*0.5,col||TH.dust||'#ffffff',(dir||0)*(1+Math.random()*1.5)+(Math.random()-0.5)*1.6,0.6+Math.random()*1.4,(Math.random()-0.5)*1.2,0.4+Math.random()*0.3,0.14+Math.random()*0.11,3,false,{grow:2,drag:2.5,spin:2});
 }
 /* a spray thrown up and out, for water and for a ground pound */
 function spray(x,y,col,n,spd,glow){
@@ -2159,7 +2161,7 @@ function trail(x,y,col,size,life){ spawnPart(x,y,0.1,col,0,0,0,life||0.28,size||
 
 /* ---------- rings ---------- */
 /* a ring that spreads along the ground, or with `up`, stands facing the camera */
-const RINGS=[], ringGeo=new T.RingGeometry(0.82,1,28);
+const RINGS=[], ringGeo=new T.RingGeometry(0.76,1,32);
 function ring(x,y,col,size,life,up){
   let r=null; for(const q of RINGS) if(q.t>=q.life){ r=q; break; }
   if(!r){ if(RINGS.length>=12) return; const m=new T.Mesh(ringGeo,new T.MeshBasicMaterial({transparent:true,depthWrite:false,side:T.DoubleSide})); fx.add(m); r={mesh:m,t:1,life:1}; RINGS.push(r); }
@@ -2208,7 +2210,7 @@ function animFx(dt){
     const m=p.glow?fxGlow:fxLit, i=p.glow?ng++:nl++; m.setMatrixAt(i,_fd.matrix); m.setColorAt(i,_fc.set(p.col)); }
   fxLit.count=nl; fxGlow.count=ng;
   for(const m of [fxLit,fxGlow]){ m.instanceMatrix.needsUpdate=true; if(m.instanceColor) m.instanceColor.needsUpdate=true; }
-  for(const r of RINGS){ if(r.t>=r.life) continue; r.t+=dt; if(r.t>=r.life){ r.mesh.visible=false; continue; } const u=r.t/r.life; r.mesh.scale.setScalar(0.3+u*r.size); r.mesh.material.opacity=(1-u)*0.8; }
+  for(const r of RINGS){ if(r.t>=r.life) continue; r.t+=dt; if(r.t>=r.life){ r.mesh.visible=false; continue; } const u=r.t/r.life; r.mesh.scale.setScalar(0.3+u*r.size); r.mesh.material.opacity=(1-u*u)*0.9; }
   for(const s of POPS){ if(s.life<=0) continue; s.life-=dt; if(s.life<=0){ s.sp.visible=false; continue; } s.sp.position.y+=dt*1.5; s.sp.material.opacity=Math.min(1,s.life*4); }
   for(const c of CPOPS){ if(c.t<0) continue; c.t+=dt;
     if(c.t>0.55){ c.t=-1; c.mesh.visible=false; popup(c.x,c.y+1.1,'200','#ffe14d'); continue; }
@@ -2519,7 +2521,7 @@ function poundLand(){
   const p=player, ty=Math.floor(p.y-0.5), txl=Math.floor(p.x-p.w/2+0.05), txr=Math.floor(p.x+p.w/2-0.05); let broke=0, any=0;
   for(let tx=txl;tx<=txr;tx++){ const id=tileAt(tx,ty); if(id===BRICK||id===QBLOCK||id===SWITCH||id===CRUMBLE){ any++; if(bumpBlock(tx,ty,true)) broke++; } }
   if(broke&&broke===any&&!solidAt(txl,ty)&&!solidAt(txr,ty)){ p.vy=-16; return true; }
-  p.pound=0; p.poundT=0.16; p.squash=1.6; sfx.poundLand(); shake(0.28); ring(p.x,p.y,'#ffffff',2.6,0.35); ripple(p.x,p.y,0.014,0.34,0.45); dust(p.x-0.4,p.y,4,-1); dust(p.x+0.4,p.y,4,1);
+  p.pound=0; p.poundT=0.16; p.squash=1.6; sfx.poundLand(); shake(0.28); ring(p.x,p.y,'#ffffff',2.6,0.35); ripple(p.x,p.y,0.02,0.36,0.45); dust(p.x-0.4,p.y,4,-1); dust(p.x+0.4,p.y,4,1);
   for(const e of enemies){ if(!e.active||e.dead||e.gone||e.K.heavy||e.K.fly||!e.onGround) continue;
     if(Math.abs(e.x-p.x)<2.3&&Math.abs(e.y-p.y)<0.8){ if(e.K.stomp||e.K.flip){ killEnemy(e,'flip',sgn(e.x-p.x)); comboScore(e.x,e.y+e.h); } else { e.vy=7; e.onGround=false; } } }
   return false;
@@ -2691,7 +2693,7 @@ function collectSpark(s){
   const n=sparks.filter(q=>q.got||q.had).length;
   if(!s.had){ G.sparks[G.levelIdx]=(G.sparks[G.levelIdx]|0)|(1<<s.i); addScore(2000,s.x,s.y+0.6); writeSave(G.levelIdx); }
   sfx.spark(clamp(n,1,3)); musicDuck(n>=3?1.4:0.7); popup(s.x,s.y+1.3,n>=3?'All 3 sun sparks!':'Sun spark '+n+' of 3','#fff3a0');
-  sparkle(s.x,s.y,'#fff3a0',16,5,0.13); sparkle(s.x,s.y,'#ffffff',8,3,0.09); ring(s.x,s.y,'#ffe14d',2.4,0.5,true); flash(0.1); ripple(s.x,s.y,0.008,0.3,0.5);
+  sparkle(s.x,s.y,'#fff3a0',16,5,0.13); sparkle(s.x,s.y,'#ffffff',8,3,0.09); ring(s.x,s.y,'#ffe14d',2.4,0.5,true); flash(0.1); ripple(s.x,s.y,0.012,0.3,0.5);
   if(n>=3) confetti(s.x,s.y+0.5,30,7);
 }
 
@@ -3370,18 +3372,18 @@ function playerVsEnemies(){
 
 /* ---------- the tune ---------- */
 /* @song */
-/* G major, on five notes, in no hurry: a plucked koto carries the tune over a second koto's ripples, a flute holds long
-   notes above, and two drums and a wood block keep time. */
+/* G major, on five notes, in no hurry: a plucked koto carries the tune in the middle of its range over a second koto's
+   ripples, a flute holds long notes a little above, and two drums and a wood block keep time. */
 SONGS.bluffs=(()=>{
-  const h='D5 . E5 G5 A5 - G5 E5  D5 - B4 . D5 - . .  E5 . G5 A5 B5 - A5 G5  A5 - E5 . G5 - . . ';
-  const a=h+'B5 . A5 G5 E5 - G5 A5  B5 - D6 . B5 - . .  A5 . G5 E5 D5 - E5 G5  A5 - - . D5 E5 G5 A5 ';
-  const a2=h+'B5 . D6 E6 D6 - B5 A5  G5 - A5 . B5 - . .  A5 . G5 E5 D5 . E5 .  G5 - - . . D5 E5 G5 ';
-  const b='E6 - - D6 B5 - A5 .  G5 - A5 - B5 - - .  D6 - - B5 A5 - G5 .  E5 - G5 - A5 - - .  E6 - - D6 B5 - D6 .  E6 - G6 - E6 - - .  D6 . B5 . A5 . G5 .  A5 - - - D5 E5 G5 A5 ';
+  const h='D4 . E4 G4 A4 - G4 E4  D4 - B3 . D4 - . .  E4 . G4 A4 B4 - A4 G4  A4 - E4 . G4 - . . ';
+  const a=h+'B4 . A4 G4 E4 - G4 A4  B4 - D5 . B4 - . .  A4 . G4 E4 D4 - E4 G4  A4 - - . D4 E4 G4 A4 ';
+  const a2=h+'B4 . D5 E5 D5 - B4 A4  G4 - A4 . B4 - . .  A4 . G4 E4 D4 . E4 .  G4 - - . . D4 E4 G4 ';
+  const b='E5 - - D5 B4 - A4 .  G4 - A4 - B4 - - .  D5 - - B4 A4 - G4 .  E4 - G4 - A4 - - .  E5 - - D5 B4 - D5 .  E5 - G5 - E5 - - .  D5 . B4 . A4 . G4 .  A4 - - - D4 E4 G4 A4 ';
   const ch='G G Em Em C C D D  G G Em Em C D G G  C C G G Am Am D D7  G G Em Em C D G G';
   return song({key:'G major',bpm:122,ec:0.75,fb:0.3},
     [{w:'triangle',v:0.13,h:3,g:0.85,lp:[7,1.6],e:1,r:0.3,pan:-0.15},a+a2+b+a2],
     [{w:'triangle',v:0.055,h:2,g:0.5,pan:0.3},musArp(ch,8,'1 5 8 5 3^ 5 8 5','G3')],
-    [{w:'sine',v:0.045,vib:14,s:0.9,a:0.1,g:1,r:0.6,pan:0.2},musArp(ch,8,'5 - - - 3^ - - -','D4')],
+    [{w:'sine',v:0.045,vib:14,s:0.9,a:0.1,g:1,r:0.6,pan:0.2},musArp(ch,8,'3 - - - 5 - - -','D4')],
     [{w:'triangle',v:0.24,g:0.8},musArp(ch,8,'1 . . 5 1 . 5 .','E2')],
     [{dr:1,v:0.8},'l . r . m . r r  l . r w m . m . '.repeat(15)+'l . r . m . r r  l l m m l m w w']);
 })();
@@ -8656,7 +8658,7 @@ function boot(data){
 }
 window.__romp={G,player,input,kb,MAPST,Q,POST,WP,wipe,quality:n=>setQuality(n,true),map:()=>showMap(-1),open:n=>{ G.open=n; mapViewSync(); mapBanner(); },at:i=>{ mapPlace(i); mapBanner(); },zoom:k=>{ mapZoom=k; },
   load:(i,cp)=>{ G.levelIdx=i; beginLevel(!!cp); },tp:(x,y)=>{ player.x=x; player.y=y; player.vx=player.vy=0; focusY=y; setRoom(); },form:f=>{ player.form=f; setSize(); },
-  view:()=>({camX,camY,V,viewHalfW,W,H}),count:()=>LEVELS.length,labels:()=>LABELS,boss:()=>{ for(const e of enemies) if(e.K.boss&&!e.dead){ e.inv=0; damageBoss(e,999); } },enemies:()=>enemies,items:()=>items,plats:()=>plats,step,solidAt,tileAt,L:()=>L,animate,updateCamera,info:()=>renderer.info.render,frame};
+  view:()=>({camX,camY,V,viewHalfW,W,H}),count:()=>LEVELS.length,labels:()=>LABELS,boss:()=>{ for(const e of enemies) if(e.K.boss&&!e.dead){ e.inv=0; damageBoss(e,999); } },enemies:()=>enemies,items:()=>items,fx:{burst,dust,spray,sparkle,puff,confetti,trail,ring,popup,coinPop,shake,flash,jolt,ripple,parts:()=>PARTS.filter(p=>p.life>0).length,room:()=>[fxLit.instanceColor.count,fxGlow.instanceColor.count]},plats:()=>plats,step,solidAt,tileAt,L:()=>L,animate,updateCamera,info:()=>renderer.info.render,frame};
 if(hot&&hot.ready) hot.ready(boot); else boot((hot&&hot.data)||{});
 })();
 </script>

@@ -5,18 +5,18 @@
 
 /* ---------- the tune ---------- */
 /* @song */
-/* G major, on five notes, in no hurry: a plucked koto carries the tune over a second koto's ripples, a flute holds long
-   notes above, and two drums and a wood block keep time. */
+/* G major, on five notes, in no hurry: a plucked koto carries the tune in the middle of its range over a second koto's
+   ripples, a flute holds long notes a little above, and two drums and a wood block keep time. */
 SONGS.bluffs=(()=>{
-  const h='D5 . E5 G5 A5 - G5 E5  D5 - B4 . D5 - . .  E5 . G5 A5 B5 - A5 G5  A5 - E5 . G5 - . . ';
-  const a=h+'B5 . A5 G5 E5 - G5 A5  B5 - D6 . B5 - . .  A5 . G5 E5 D5 - E5 G5  A5 - - . D5 E5 G5 A5 ';
-  const a2=h+'B5 . D6 E6 D6 - B5 A5  G5 - A5 . B5 - . .  A5 . G5 E5 D5 . E5 .  G5 - - . . D5 E5 G5 ';
-  const b='E6 - - D6 B5 - A5 .  G5 - A5 - B5 - - .  D6 - - B5 A5 - G5 .  E5 - G5 - A5 - - .  E6 - - D6 B5 - D6 .  E6 - G6 - E6 - - .  D6 . B5 . A5 . G5 .  A5 - - - D5 E5 G5 A5 ';
+  const h='D4 . E4 G4 A4 - G4 E4  D4 - B3 . D4 - . .  E4 . G4 A4 B4 - A4 G4  A4 - E4 . G4 - . . ';
+  const a=h+'B4 . A4 G4 E4 - G4 A4  B4 - D5 . B4 - . .  A4 . G4 E4 D4 - E4 G4  A4 - - . D4 E4 G4 A4 ';
+  const a2=h+'B4 . D5 E5 D5 - B4 A4  G4 - A4 . B4 - . .  A4 . G4 E4 D4 . E4 .  G4 - - . . D4 E4 G4 ';
+  const b='E5 - - D5 B4 - A4 .  G4 - A4 - B4 - - .  D5 - - B4 A4 - G4 .  E4 - G4 - A4 - - .  E5 - - D5 B4 - D5 .  E5 - G5 - E5 - - .  D5 . B4 . A4 . G4 .  A4 - - - D4 E4 G4 A4 ';
   const ch='G G Em Em C C D D  G G Em Em C D G G  C C G G Am Am D D7  G G Em Em C D G G';
   return song({key:'G major',bpm:122,ec:0.75,fb:0.3},
     [{w:'triangle',v:0.13,h:3,g:0.85,lp:[7,1.6],e:1,r:0.3,pan:-0.15},a+a2+b+a2],
     [{w:'triangle',v:0.055,h:2,g:0.5,pan:0.3},musArp(ch,8,'1 5 8 5 3^ 5 8 5','G3')],
-    [{w:'sine',v:0.045,vib:14,s:0.9,a:0.1,g:1,r:0.6,pan:0.2},musArp(ch,8,'5 - - - 3^ - - -','D4')],
+    [{w:'sine',v:0.045,vib:14,s:0.9,a:0.1,g:1,r:0.6,pan:0.2},musArp(ch,8,'3 - - - 5 - - -','D4')],
     [{w:'triangle',v:0.24,g:0.8},musArp(ch,8,'1 . . 5 1 . 5 .','E2')],
     [{dr:1,v:0.8},'l . r . m . r r  l . r w m . m . '.repeat(15)+'l . r . m . r r  l l m m l m w w']);
 })();

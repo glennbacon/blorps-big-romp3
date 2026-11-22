@@ -445,8 +445,8 @@ SONGS.baron=(()=>{
 })();
 /* secret coin rooms: sixteen giddy bars of A major, all running eighths and hand claps, over before you know it and round again */
 SONGS.bonus=(()=>{
-  const a='A5 C#6 E6 A6 E6 C#6 E6 .  A6 . A6 . G#6 E6 C#6 .  D6 F#6 A6 F#6 D6 F#6 A6 .  B6 . A6 . F#6 D6 A5 .  E6 G#6 B6 G#6 E6 G#6 B6 .  E6 . D6 . B5 G#5 E5 .  A5 . C#6 . E6 . A6 .  G#6 E6 B5 E6 G#6 B6 . . ';
-  const a2='F#6 . A6 . D6 . F#6 A6  D7 - A6 . F#6 - . .  E6 . A6 . C#6 . E6 A6  C#7 - A6 . E6 - . .  D6 . F#6 . B5 . D6 F#6  E6 G#6 B6 E7 . B6 G#6 .  A6 . E6 C#6 A5 . C#6 E6  A6 . . . A5 . . . ';
+  const a='A4 C#5 E5 A5 E5 C#5 E5 .  A5 . A5 . G#5 E5 C#5 .  D5 F#5 A5 F#5 D5 F#5 A5 .  B5 . A5 . F#5 D5 A4 .  E5 G#5 B5 G#5 E5 G#5 B5 .  E5 . D5 . B4 G#4 E4 .  A4 . C#5 . E5 . A5 .  G#5 E5 B4 E5 G#5 B5 . . ';
+  const a2='F#5 . A5 . D5 . F#5 A5  D6 - A5 . F#5 - . .  E5 . A5 . C#5 . E5 A5  C#6 - A5 . E5 - . .  D5 . F#5 . B4 . D5 F#5  E5 G#5 B5 E6 . B5 G#5 .  A5 . E5 C#5 A4 . C#5 E5  A5 . . . A4 . . . ';
   const ch='A A D D E E A E  D D A A Bm E A A';
   return song({key:'A major',bpm:182},
     [{w:'square',v:0.055,g:0.7,e:1},a+a2],

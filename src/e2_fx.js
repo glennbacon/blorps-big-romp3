@@ -10,7 +10,9 @@ const fxCube=voxGeo([[-0.5,-0.5,-0.5,1,1,1,WHITE]],1);
 /* materials of their own: three.js builds one shader for a material that is drawn with a colour for each copy and another
    for one that is not, and must never be asked to use the wrong one */
 const fxLit=new T.InstancedMesh(fxCube,voxMat(),FX_MAX), fxGlow=new T.InstancedMesh(fxCube,new T.MeshBasicMaterial({vertexColors:true,opacity:0}),FX_MAX);
-for(const m of [fxLit,fxGlow]){ m.frustumCulled=false; m.count=0; fx.add(m); }
+/* The colours are asked for here, while the mesh still counts every bit it can hold: three.js makes room for as many
+   colours as the mesh counts at the first asking, and a mesh that counted none would get none, and draw nothing. */
+for(const m of [fxLit,fxGlow]){ m.setColorAt(0,new T.Color(1,1,1)); m.frustumCulled=false; m.count=0; fx.add(m); }
 fxLit.castShadow=true;
 function spawnPart(x,y,z,col,vx,vy,vz,life,size,grav,glow,o){
   let p=null; for(const q of PARTS) if(q.life<=0){ p=q; break; }
@@ -25,7 +27,7 @@ function burst(x,y,col,n,spd,size,life,glow){
 }
 /* a low puff of dust that drifts and settles: landing, skidding, sliding down a wall */
 function dust(x,y,n,dir,col){
-  for(let i=0;i<n;i++) spawnPart(x+(Math.random()-0.5)*0.4,y+0.08+Math.random()*0.1,0.3+Math.random()*0.5,col||TH.dust||'#ffffff',(dir||0)*(1+Math.random()*1.5)+(Math.random()-0.5)*1.6,0.6+Math.random()*1.4,(Math.random()-0.5)*1.2,0.3+Math.random()*0.25,0.09+Math.random()*0.08,3,false,{grow:1.9,drag:2.5,spin:2});
+  for(let i=0;i<n;i++) spawnPart(x+(Math.random()-0.5)*0.4,y+0.08+Math.random()*0.1,0.3+Math.random()*0.5,col||TH.dust||'#ffffff',(dir||0)*(1+Math.random()*1.5)+(Math.random()-0.5)*1.6,0.6+Math.random()*1.4,(Math.random()-0.5)*1.2,0.4+Math.random()*0.3,0.14+Math.random()*0.11,3,false,{grow:2,drag:2.5,spin:2});
 }
 /* a spray thrown up and out, for water and for a ground pound */
 function spray(x,y,col,n,spd,glow){
@@ -52,7 +54,7 @@ function trail(x,y,col,size,life){ spawnPart(x,y,0.1,col,0,0,0,life||0.28,size||
 
 /* ---------- rings ---------- */
 /* a ring that spreads along the ground, or with `up`, stands facing the camera */
-const RINGS=[], ringGeo=new T.RingGeometry(0.82,1,28);
+const RINGS=[], ringGeo=new T.RingGeometry(0.76,1,32);
 function ring(x,y,col,size,life,up){
   let r=null; for(const q of RINGS) if(q.t>=q.life){ r=q; break; }
   if(!r){ if(RINGS.length>=12) return; const m=new T.Mesh(ringGeo,new T.MeshBasicMaterial({transparent:true,depthWrite:false,side:T.DoubleSide})); fx.add(m); r={mesh:m,t:1,life:1}; RINGS.push(r); }
@@ -101,7 +103,7 @@ function animFx(dt){
     const m=p.glow?fxGlow:fxLit, i=p.glow?ng++:nl++; m.setMatrixAt(i,_fd.matrix); m.setColorAt(i,_fc.set(p.col)); }
   fxLit.count=nl; fxGlow.count=ng;
   for(const m of [fxLit,fxGlow]){ m.instanceMatrix.needsUpdate=true; if(m.instanceColor) m.instanceColor.needsUpdate=true; }
-  for(const r of RINGS){ if(r.t>=r.life) continue; r.t+=dt; if(r.t>=r.life){ r.mesh.visible=false; continue; } const u=r.t/r.life; r.mesh.scale.setScalar(0.3+u*r.size); r.mesh.material.opacity=(1-u)*0.8; }
+  for(const r of RINGS){ if(r.t>=r.life) continue; r.t+=dt; if(r.t>=r.life){ r.mesh.visible=false; continue; } const u=r.t/r.life; r.mesh.scale.setScalar(0.3+u*r.size); r.mesh.material.opacity=(1-u*u)*0.9; }
   for(const s of POPS){ if(s.life<=0) continue; s.life-=dt; if(s.life<=0){ s.sp.visible=false; continue; } s.sp.position.y+=dt*1.5; s.sp.material.opacity=Math.min(1,s.life*4); }
   for(const c of CPOPS){ if(c.t<0) continue; c.t+=dt;
     if(c.t>0.55){ c.t=-1; c.mesh.visible=false; popup(c.x,c.y+1.1,'200','#ffe14d'); continue; }

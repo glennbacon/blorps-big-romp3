@@ -470,5 +470,5 @@ function boot(data){
 }
 window.__romp={G,player,input,kb,MAPST,Q,POST,WP,wipe,quality:n=>setQuality(n,true),map:()=>showMap(-1),open:n=>{ G.open=n; mapViewSync(); mapBanner(); },at:i=>{ mapPlace(i); mapBanner(); },zoom:k=>{ mapZoom=k; },
   load:(i,cp)=>{ G.levelIdx=i; beginLevel(!!cp); },tp:(x,y)=>{ player.x=x; player.y=y; player.vx=player.vy=0; focusY=y; setRoom(); },form:f=>{ player.form=f; setSize(); },
-  view:()=>({camX,camY,V,viewHalfW,W,H}),count:()=>LEVELS.length,labels:()=>LABELS,boss:()=>{ for(const e of enemies) if(e.K.boss&&!e.dead){ e.inv=0; damageBoss(e,999); } },enemies:()=>enemies,items:()=>items,plats:()=>plats,step,solidAt,tileAt,L:()=>L,animate,updateCamera,info:()=>renderer.info.render,frame};
+  view:()=>({camX,camY,V,viewHalfW,W,H}),count:()=>LEVELS.length,labels:()=>LABELS,boss:()=>{ for(const e of enemies) if(e.K.boss&&!e.dead){ e.inv=0; damageBoss(e,999); } },enemies:()=>enemies,items:()=>items,fx:{burst,dust,spray,sparkle,puff,confetti,trail,ring,popup,coinPop,shake,flash,jolt,ripple,parts:()=>PARTS.filter(p=>p.life>0).length,room:()=>[fxLit.instanceColor.count,fxGlow.instanceColor.count]},plats:()=>plats,step,solidAt,tileAt,L:()=>L,animate,updateCamera,info:()=>renderer.info.render,frame};
 if(hot&&hot.ready) hot.ready(boot); else boot((hot&&hot.data)||{});
