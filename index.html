@@ -1678,7 +1678,7 @@ let coinMesh=null,coinIdx=new Map(),coinPos=[];
 let sunMesh=null,flagMesh=null,cpFlag=null,motes=null,blinkOn=false,clouds=[],critters=[],lamps=[];
 let enemies=[],items=[],shots=[],bombs=[],plats=[],springs=[],firebars=[],bumps=[],sparks=[],pods=[],jets=[],cannons=[],signs=[],winds=[],geysers=[],lasers=[],chutes=[];
 let pitTop=null,pitFace=null,pitFaceH=0;
-let V=12.5,viewHalfW=11,camDist=23.3,camBaseY=6.25,camX=8,camY=6.25,camLead=0,focusY=2,shakeT=0,shakeA=0;
+let V=12.5,viewHalfW=11,camDist=23.3,camBaseY=6.25,camX=8,camY=6.25,camLead=0,camYaw=0,focusY=2,shakeT=0,shakeA=0;
 
 const tileAt=(x,y)=>(x<0||x>=W||y<0||y>=H)?AIR:tiles[y*W+x];
 /* red blocks are solid while the switch is on, blue ones while it is off */
@@ -2080,7 +2080,10 @@ function updateCamera(dt,snap){
   if(snap){ camX=tx; camY=ty; } else { camX+=(tx-camX)*Math.min(1,dt*6); camY+=(ty-camY)*Math.min(1,dt*3.2); }
   let sx=0,sy=0;
   if(shakeT>0){ shakeT-=dt; if(!reduceMotion){ sx=(Math.random()-0.5)*shakeA; sy=(Math.random()-0.5)*shakeA; } }
-  camera.position.set(camX+sx,camY+camDist*Math.sin(0.19)+sy,camDist*Math.cos(0.19));
+  /* the camera swings a degree or two against the way Blorp is heading, so the world shows its sides as he turns */
+  camYaw+=((reduceMotion?0:clamp(camLead,-3,3)*-0.011)-camYaw)*Math.min(1,dt*1.6); if(snap) camYaw=0;
+  const cz=camDist*Math.cos(0.19);
+  camera.position.set(camX+sx+Math.sin(camYaw)*cz,camY+camDist*Math.sin(0.19)+sy,Math.cos(camYaw)*cz);
   camera.lookAt(camX+sx,camY+sy,0); camLookX=camX+sx; camLookY=camY+sy;
   placeSun(camX,camY-2,-2);
   if(sunMesh){ sunMesh.position.x=camX+viewHalfW*2.2*(TH.discX===undefined?1:TH.discX); const s=screenOf(sunMesh.position.x,sunMesh.position.y,sunMesh.position.z); skyU.sunPos.value.set(s[0],s[1]); }
@@ -2363,6 +2366,7 @@ function breakBrick(tx,ty){
   addScore(50); sfx.brk(); shake(0.12);
   const c=TH.brick;
   for(let i=0;i<8;i++) spawnPart(tx+0.25+(i%2)*0.5,ty+0.25+((i>>1)%2)*0.5,(i>>2)*0.5-0.25,c[i%3],(i%2?1:-1)*(2+Math.random()*2.5),7+Math.random()*5,(Math.random()-0.5)*4,0.9,0.3,36);
+  puff(tx+0.5,ty+0.5,c[2],4,0.2,0.4);
 }
 /* The switch flips every red and blue block. A block that would close on Blorp waits for him; one that closes on a
    monster squashes it. */
@@ -2875,7 +2879,7 @@ const hitBox=e=>e.K.box?e.K.box(e):[e.y,e.h];
 const onScreen=(e,m)=>Math.abs(e.x-camX)<viewHalfW+(m||0);
 function killEnemy(e,how,dir){
   if(e.dead) return; e.dead=true;
-  if(how==='squish'&&!e.K.fly){ e.flip=false; e.deadT=0.45; e.mesh.scale.set(1.25,0.28,1.25); sfx.stomp(player.combo); }
+  if(how==='squish'&&!e.K.fly){ e.flip=false; e.deadT=0.45; e.mesh.scale.set(1.25,0.28,1.25); sfx.stomp(player.combo); ring(e.x,e.y,'#ffffff',1.5,0.25); }
   else { e.flip=true; if(how==='squish'){ e.vy=1; e.vx=0; sfx.stomp(player.combo); } else { e.vy=9; e.vx=(dir||1)*3; sfx.kick(); } if(e.K.unroot) e.K.unroot(e); }
   puff(e.x,e.y+e.h*0.5,WHITE,5,0.17,0.6); burst(e.x,e.y+e.h*0.5,'#fff3a0',3,3,0.08,0.3,true);
   if(e.K.onKill) e.K.onKill(e);
@@ -4256,7 +4260,8 @@ function animPlayer(dt,time){
   if(!p.dead&&!p.goal&&!p.warp){ st=p.dash>0?0.8:p.pound===2?1.25:p.onGround?1-Math.min(1,p.squash)*0.22+Math.sin(time*3)*0.015:1+clamp(p.vy,-9,12)*0.012; }
   const inv=1/Math.sqrt(st); g.scale.set(inv,st,inv);
   if(p.star>0){ pmat.emissive.setHSL((time*1.6)%1,1,(p.star<2&&((time*10|0)%2))?0.06:0.34); glowAt(p.x,p.y+0.6,1.2,_col.setHSL((time*1.6)%1,1,0.6).getHex(),1.3,7);
-    if(Math.random()<dt*24) spawnPart(p.x+(Math.random()-0.5)*0.8,p.y+Math.random()*p.h,0.4,'#fff3a0',0,1,0,0.4,0.09,-2,true); }
+    if(Math.random()<dt*24) spawnPart(p.x+(Math.random()-0.5)*0.8,p.y+Math.random()*p.h,0.4,'#fff3a0',0,1,0,0.4,0.09,-2,true);
+    if(Math.abs(p.vx)>3&&Math.random()<dt*30) trail(p.x-p.face*0.3,p.y+p.h*0.5,'#'+_col.setHSL((time*1.6)%1,1,0.62).getHexString(),p.h*0.5,0.25); }
   else if(p.form===4&&!p.dead){ const k=0.1+Math.sin(time*4)*0.04+(p.dash>0?0.3:0); pmat.emissive.setRGB(k,k*0.7,0); glowAt(p.x,p.y+p.h*0.6,1,0xffd23e,0.9+(p.dash>0?0.8:0),6.5);
     if(Math.random()<dt*7) spawnPart(p.x+(Math.random()-0.5)*0.8,p.y+Math.random()*p.h,0.4,'#fff3a0',0,0.8,0,0.5,0.07,-1.5,true); }
   else pmat.emissive.setRGB(0,0,0);

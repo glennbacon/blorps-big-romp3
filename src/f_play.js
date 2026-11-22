@@ -82,6 +82,7 @@ function breakBrick(tx,ty){
   addScore(50); sfx.brk(); shake(0.12);
   const c=TH.brick;
   for(let i=0;i<8;i++) spawnPart(tx+0.25+(i%2)*0.5,ty+0.25+((i>>1)%2)*0.5,(i>>2)*0.5-0.25,c[i%3],(i%2?1:-1)*(2+Math.random()*2.5),7+Math.random()*5,(Math.random()-0.5)*4,0.9,0.3,36);
+  puff(tx+0.5,ty+0.5,c[2],4,0.2,0.4);
 }
 /* The switch flips every red and blue block. A block that would close on Blorp waits for him; one that closes on a
    monster squashes it. */

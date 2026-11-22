@@ -6,7 +6,7 @@ let coinMesh=null,coinIdx=new Map(),coinPos=[];
 let sunMesh=null,flagMesh=null,cpFlag=null,motes=null,blinkOn=false,clouds=[],critters=[],lamps=[];
 let enemies=[],items=[],shots=[],bombs=[],plats=[],springs=[],firebars=[],bumps=[],sparks=[],pods=[],jets=[],cannons=[],signs=[],winds=[],geysers=[],lasers=[],chutes=[];
 let pitTop=null,pitFace=null,pitFaceH=0;
-let V=12.5,viewHalfW=11,camDist=23.3,camBaseY=6.25,camX=8,camY=6.25,camLead=0,focusY=2,shakeT=0,shakeA=0;
+let V=12.5,viewHalfW=11,camDist=23.3,camBaseY=6.25,camX=8,camY=6.25,camLead=0,camYaw=0,focusY=2,shakeT=0,shakeA=0;
 
 const tileAt=(x,y)=>(x<0||x>=W||y<0||y>=H)?AIR:tiles[y*W+x];
 /* red blocks are solid while the switch is on, blue ones while it is off */
@@ -408,7 +408,10 @@ function updateCamera(dt,snap){
   if(snap){ camX=tx; camY=ty; } else { camX+=(tx-camX)*Math.min(1,dt*6); camY+=(ty-camY)*Math.min(1,dt*3.2); }
   let sx=0,sy=0;
   if(shakeT>0){ shakeT-=dt; if(!reduceMotion){ sx=(Math.random()-0.5)*shakeA; sy=(Math.random()-0.5)*shakeA; } }
-  camera.position.set(camX+sx,camY+camDist*Math.sin(0.19)+sy,camDist*Math.cos(0.19));
+  /* the camera swings a degree or two against the way Blorp is heading, so the world shows its sides as he turns */
+  camYaw+=((reduceMotion?0:clamp(camLead,-3,3)*-0.011)-camYaw)*Math.min(1,dt*1.6); if(snap) camYaw=0;
+  const cz=camDist*Math.cos(0.19);
+  camera.position.set(camX+sx+Math.sin(camYaw)*cz,camY+camDist*Math.sin(0.19)+sy,Math.cos(camYaw)*cz);
   camera.lookAt(camX+sx,camY+sy,0); camLookX=camX+sx; camLookY=camY+sy;
   placeSun(camX,camY-2,-2);
   if(sunMesh){ sunMesh.position.x=camX+viewHalfW*2.2*(TH.discX===undefined?1:TH.discX); const s=screenOf(sunMesh.position.x,sunMesh.position.y,sunMesh.position.z); skyU.sunPos.value.set(s[0],s[1]); }

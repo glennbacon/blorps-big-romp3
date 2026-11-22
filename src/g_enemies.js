@@ -28,7 +28,7 @@ const hitBox=e=>e.K.box?e.K.box(e):[e.y,e.h];
 const onScreen=(e,m)=>Math.abs(e.x-camX)<viewHalfW+(m||0);
 function killEnemy(e,how,dir){
   if(e.dead) return; e.dead=true;
-  if(how==='squish'&&!e.K.fly){ e.flip=false; e.deadT=0.45; e.mesh.scale.set(1.25,0.28,1.25); sfx.stomp(player.combo); }
+  if(how==='squish'&&!e.K.fly){ e.flip=false; e.deadT=0.45; e.mesh.scale.set(1.25,0.28,1.25); sfx.stomp(player.combo); ring(e.x,e.y,'#ffffff',1.5,0.25); }
   else { e.flip=true; if(how==='squish'){ e.vy=1; e.vx=0; sfx.stomp(player.combo); } else { e.vy=9; e.vx=(dir||1)*3; sfx.kick(); } if(e.K.unroot) e.K.unroot(e); }
   puff(e.x,e.y+e.h*0.5,WHITE,5,0.17,0.6); burst(e.x,e.y+e.h*0.5,'#fff3a0',3,3,0.08,0.3,true);
   if(e.K.onKill) e.K.onKill(e);

@@ -64,7 +64,8 @@ function animPlayer(dt,time){
   if(!p.dead&&!p.goal&&!p.warp){ st=p.dash>0?0.8:p.pound===2?1.25:p.onGround?1-Math.min(1,p.squash)*0.22+Math.sin(time*3)*0.015:1+clamp(p.vy,-9,12)*0.012; }
   const inv=1/Math.sqrt(st); g.scale.set(inv,st,inv);
   if(p.star>0){ pmat.emissive.setHSL((time*1.6)%1,1,(p.star<2&&((time*10|0)%2))?0.06:0.34); glowAt(p.x,p.y+0.6,1.2,_col.setHSL((time*1.6)%1,1,0.6).getHex(),1.3,7);
-    if(Math.random()<dt*24) spawnPart(p.x+(Math.random()-0.5)*0.8,p.y+Math.random()*p.h,0.4,'#fff3a0',0,1,0,0.4,0.09,-2,true); }
+    if(Math.random()<dt*24) spawnPart(p.x+(Math.random()-0.5)*0.8,p.y+Math.random()*p.h,0.4,'#fff3a0',0,1,0,0.4,0.09,-2,true);
+    if(Math.abs(p.vx)>3&&Math.random()<dt*30) trail(p.x-p.face*0.3,p.y+p.h*0.5,'#'+_col.setHSL((time*1.6)%1,1,0.62).getHexString(),p.h*0.5,0.25); }
   else if(p.form===4&&!p.dead){ const k=0.1+Math.sin(time*4)*0.04+(p.dash>0?0.3:0); pmat.emissive.setRGB(k,k*0.7,0); glowAt(p.x,p.y+p.h*0.6,1,0xffd23e,0.9+(p.dash>0?0.8:0),6.5);
     if(Math.random()<dt*7) spawnPart(p.x+(Math.random()-0.5)*0.8,p.y+Math.random()*p.h,0.4,'#fff3a0',0,0.8,0,0.5,0.07,-1.5,true); }
   else pmat.emissive.setRGB(0,0,0);
