@@ -4,7 +4,7 @@ A voxel platformer with a 2.5D side-scrolling view, built with [three.js](https:
 
 **[Play it in your browser](https://glennbacon.github.io/arcade/blorps-big-romp-3/)**
 
-![The title screen, Blossom Bluffs, a dark level, and the world map](screenshot.png)
+![The title screen, Blossom Bluffs, Firefly Fen by night, Neon Noodletown, Rock Candy Caverns, and the world map](screenshot.png)
 
 It is one of the games in [Glenn Bacon's arcade](https://glennbacon.github.io/arcade/), next to the first two.
 
