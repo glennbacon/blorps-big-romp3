@@ -365,26 +365,27 @@ defEnemy('apple',{boss:true,heavy:true,
   hurt(e){ e.st='wind'; e.stT=0.8; e.vx=0; e.spiky=true; e.dir=player.x<e.x?-1:1; },
   anim(e,m,dt,time){ const q=m.children[0]; q.position.y=1.1; q.rotation.z=e.st==='roll'?e.rot:e.st==='wind'?Math.sin(time*40)*0.06-e.dir*0.25:e.st==='dizzy'?Math.sin(time*5)*0.2:0;
     q.rotation.y=e.st==='roll'?0:(e.dir||-1)*0.5; if(e.st==='dizzy') bossStars(e,time); const k=e.st==='idle'?1+Math.sin(time*6)*0.03:1; q.scale.set(2.2/k,2.2*k,2.2/k); bossBlink(e,m,time); }});
-/* King Croak: sits and stares; leaps the length of the pond to land on Blorp (and the landing sends ripples); or opens wide
-   and lets fly a tongue as long as the room, which has to be jumped. After the tongue he is out of puff. */
+/* King Croak: sits and stares; opens wide and lets fly a tongue as long as the room, which has to be jumped, and is then
+   out of puff for a good while; or leaps the length of the pond to land on Blorp (the landing sends ripples), and squats
+   a moment where he lands. Out of puff or squatting, his head is safe to land on; the rest of the time his crown is not. */
 defEnemy('croak',{boss:true,heavy:true,
-  init(e,d){ bossInit(e,d); e.w=2.5; e.h=1.9; e.st='sit'; e.stT=1.8; e.tl=0; e.reach=8; },
+  init(e,d){ bossInit(e,d); e.w=2.5; e.h=1.9; e.st='sit'; e.stT=1.2; e.tl=0; e.reach=8; e.fled=0; },
   mesh(){ const g=new T.Group(), m=vmesh('croak',mBossCroak), t=new T.Mesh(partGeo,pmatOf('#ff7aa8')); m.scale.setScalar(2.6); t.visible=false; g.add(m,t); g.userData.tongue=t; return g; },
   tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0; e.inv=Math.max(0,e.inv-dt); e.stT-=dt;
     if(e.st==='walk') e.st='sit';
-    e.spiky=e.st!=='puffed';
+    e.spiky=e.st!=='puffed'&&e.st!=='squat';
     if(e.st==='sit'){ e.vx=0; e.tl=0; e.dir=p.x<e.x?-1:1;
-      if(e.stT<=0&&e.onGround){ if(e.n++%2===0||Math.abs(p.x-e.x)<2.5){ e.st='leap'; e.vy=17+rage*2; e.vx=clamp((p.x-e.x)/1.05,-9,9); e.onGround=false; sfx.croak(); }
+      if(e.stT<=0&&e.onGround){ if(e.n++%2===1||Math.abs(p.x-e.x)<2.5){ e.st='leap'; e.fled=0; e.vy=17+rage*2; e.vx=clamp((p.x-e.x)/1.05,-9,9); e.onGround=false; sfx.croak(); }
         else { e.st='gape'; e.stT=0.7-rage*0.2; sfx.croak(); } } }
-    else if(e.st==='gape'){ if(e.stT<=0){ e.st='lash'; e.stT=0.8; e.reach=Math.min(11,tongueReach(e,12)-1); sfx.tongue(); } }
-    else if(e.st==='lash'){ e.tl=Math.sin((1-e.stT/0.8)*Math.PI)*e.reach; if(tongueHits(e,1.2,e.tl,0.55,1.05)) hurtPlayer(); if(e.stT<=0){ e.st='puffed'; e.stT=2.4-rage*0.8; e.tl=0; } }
-    else if(e.st==='puffed'){ if(e.stT<=0){ e.st='sit'; e.stT=0.7; } }
+    else if(e.st==='gape'){ if(e.stT<=0){ e.st='lash'; e.stT=0.6; e.reach=Math.min(11,tongueReach(e,12)-1); sfx.tongue(); } }
+    else if(e.st==='lash'){ e.tl=Math.sin((1-e.stT/0.6)*Math.PI)*e.reach; if(tongueHits(e,1.2,e.tl,0.55,1.05)) hurtPlayer(); if(e.stT<=0){ e.st='puffed'; e.stT=3-rage*0.9; e.tl=0; } }
+    else if(e.st==='puffed'||e.st==='squat'){ e.vx=0; if(e.stT<=0){ e.st='sit'; e.stT=0.8-rage*0.3; } }
     const thud=bossMove(e,dt);
-    if(e.st==='leap'&&e.onGround){ e.st='sit'; e.stT=1.5-rage*0.7; e.vx=0; if(thud){ ripple(e.x,e.y,0.02,0.5,0.5); if(rage>0.3) shockwave(e.x,e.y); } } },
-  hurt(e){ if(e.onGround){ e.st='leap'; e.vy=15; e.vx=(e.x-(e.x0+e.x1)/2>0?-1:1)*7; e.onGround=false; e.tl=0; } },
+    if(e.st==='leap'&&e.onGround){ e.vx=0; if(e.fled){ e.st='sit'; e.stT=0.9; } else { e.st='squat'; e.stT=1-rage*0.3; } if(thud){ ripple(e.x,e.y,0.02,0.5,0.5); if(rage>0.3&&!e.fled) shockwave(e.x,e.y); } } },
+  hurt(e){ if(e.onGround){ e.st='leap'; e.fled=1; e.vy=15; e.vx=(e.x-(e.x0+e.x1)/2>0?-1:1)*7; e.onGround=false; e.tl=0; } },
   anim(e,m,dt,time){ const q=m.children[0], t=m.userData.tongue; q.scale.set(2.6*e.dir*-1*-1,2.6,2.6); q.scale.x=2.6*(e.dir<0?-1:1); t.visible=e.tl>0.05;
     if(t.visible){ t.position.set(e.dir*(1.2+e.tl/2),0.8,0.2); t.scale.set(e.tl,0.36,0.4); }
-    const k=e.st==='gape'?1.12:e.st==='puffed'?0.9+Math.sin(time*9)*0.04:e.onGround?1+Math.sin(time*3)*0.03:1.1; q.scale.y=2.6*k; if(e.st==='puffed') bossStars(e,time); bossBlink(e,m,time); }});
+    const k=e.st==='gape'?1.12:e.st==='puffed'?0.9+Math.sin(time*9)*0.04:e.st==='squat'?0.82:e.onGround?1+Math.sin(time*3)*0.03:1.1; q.scale.y=2.6*k; if(e.st==='puffed'||e.st==='squat') bossStars(e,time); bossBlink(e,m,time); }});
 /* Ringmaster Razzle: bounces round the ring on a great ball, juggling as he goes and throwing what he juggles. Every so
    often he slips off, and sits on the sawdust wondering where the ball went. */
 defEnemy('razzle',{boss:true,heavy:true,
@@ -404,7 +405,7 @@ defEnemy('razzle',{boss:true,heavy:true,
 /* Wokbot 3000: plods after Blorp with its wok too hot to touch, tosses flaming dumplings, then sweeps the floor with a
    beam that has to be jumped. That overheats it, and while it vents, its head is safe to land on. */
 defEnemy('wokbot',{boss:true,heavy:true,
-  init(e,d){ bossInit(e,d); e.w=2.4; e.h=2.7; e.st='walk'; e.stT=2.2; e.spiky=true; e.dir=-1; e.beam=0; e.reach=0; },
+  init(e,d){ bossInit(e,d); e.w=2.4; e.h=2.7; e.st='walk'; e.stT=1.4; e.spiky=true; e.dir=-1; e.beam=0; e.reach=0; },
   mesh(){ const g=new T.Group(), m=vmesh('wokbot',mBossWok), nd=vmesh('wokNoodles',mWokNoodles), bm=new T.Mesh(partGeo,pmatOf('#ff3b6b',true)), core=new T.Mesh(partGeo,pmatOf('#ffffff',true));
     m.scale.setScalar(2.2); nd.scale.setScalar(2.2); bm.visible=core.visible=false; g.add(m,nd,bm,core); Object.assign(g.userData,{bot:m,nd,bm,core}); return g; },
   tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0; e.inv=Math.max(0,e.inv-dt); e.stT-=dt; e.beam=0;
@@ -412,8 +413,8 @@ defEnemy('wokbot',{boss:true,heavy:true,
     else if(e.st==='toss'){ const want=2+Math.round(rage*2), due=Math.floor((0.9+rage*0.4-e.stT)/0.3); if(due>e.n&&e.n<want&&!p.dead){ e.n++; throwAt(e.x,e.y+3.2,clamp((p.x-e.x)/1.15+(e.n-1.5)*1.6,-9,9),11.5,mFireball,'fball',{r:0.36,glow:true,col:'#ff7a1f'}); sfx.fire(); }
       if(e.stT<=0){ e.st='aim'; e.stT=0.95-rage*0.25; e.dir=p.x<e.x?-1:1; e.reach=tongueReach(e,30); sfx.bleep(); } }
     else if(e.st==='aim'){ e.beam=-1; if(e.stT<=0){ e.st='beam'; e.stT=0.34; sfx.laser(); flash(0.08); } }
-    else if(e.st==='beam'){ e.beam=1; if(tongueHits(e,1.2,e.reach-1.2,0,0.6)) hurtPlayer(); if(e.stT<=0){ e.st='vent'; e.stT=2.3-rage*0.8; sfx.geyser(); } }
-    else if(e.st==='vent'){ e.spiky=false; e.vx=0; if(e.stT<=0){ e.st='walk'; e.stT=1.8-rage*0.6; } }
+    else if(e.st==='beam'){ e.beam=1; if(tongueHits(e,1.2,e.reach-1.2,0,0.6)) hurtPlayer(); if(e.stT<=0){ e.st='vent'; e.stT=2.8-rage*0.9; sfx.geyser(); } }
+    else if(e.st==='vent'){ e.spiky=false; e.vx=0; if(e.stT<=0){ e.st='walk'; e.stT=1.4-rage*0.5; } }
     bossMove(e,dt); },
   hurt(e){ e.st='walk'; e.stT=1.1; e.spiky=true; },
   anim(e,m,dt,time){ const u=m.userData; u.bot.rotation.y=u.nd.rotation.y=e.dir*0.6; u.bot.rotation.z=e.st==='vent'?Math.sin(time*30)*0.03:e.onGround&&e.st==='walk'?Math.sin(time*7)*0.05:0;
@@ -426,7 +427,7 @@ defEnemy('wokbot',{boss:true,heavy:true,
    resist a swoop to gloat, which leaves him low and winded. Three moods: the second adds the dark, the third bolts of it. */
 let baronDark=0, dawn=-1;
 defEnemy('baron',{boss:true,heavy:true,fly:true,
-  init(e,d){ bossInit(e,d); e.w=2.3; e.h=2.7; e.st='drift'; e.stT=3; e.y=8.4; e.orb=1.2; e.dir=-1; e.dark=0; e.cols=null; baronDark=0; dawn=-1; },
+  init(e,d){ bossInit(e,d); e.w=2.3; e.h=2.7; e.st='drift'; e.stT=1.6; e.y=8.4; e.orb=1.2; e.dir=-1; e.dark=0; e.cols=null; baronDark=0; dawn=-1; },
   mesh(){ const g=new T.Group(), m=vmesh('baron',mBossBaron), c=vmesh('baronCloud',mBaronCloud), s=vmesh('baronSnuffer',mBaronSnuffer); m.scale.setScalar(2.1); c.scale.setScalar(2.1); s.scale.setScalar(2.1); m.position.y=0.5; s.position.set(1.5,0.9,0.4); g.add(c,m,s); Object.assign(g.userData,{man:m,cloud:c,snuf:s}); return g; },
   box:e=>[e.y+0.4,e.h],
   tick(e,dt){ const p=player, rage=(e.hp0-e.hp)/e.hp0, mood=rage<0.34?0:rage<0.67?1:2; e.inv=Math.max(0,e.inv-dt); e.stT-=dt; e.dark=Math.max(0,e.dark-dt);
@@ -434,8 +435,8 @@ defEnemy('baron',{boss:true,heavy:true,fly:true,
     if(e.st==='drift'){ e.dir=p.x<e.x?-1:1; e.x+=clamp(p.x-e.x,-1,1)*(2.6+rage*2)*dt; e.x=clamp(e.x,e.x0,e.x1); e.y+=(8.4-e.y)*Math.min(1,dt*3);
       e.orb-=dt; if(e.orb<=0&&!p.dead){ e.orb=1.25-rage*0.5; throwAt(e.x,e.y+0.2,clamp((p.x-e.x)*0.5,-3,3),-1,mDarkOrb,'dorb',{g:15,r:0.36,glow:true,col:'#8a5cf0'}); sfx.spit(); }
       /* between swoops: a downpour of dark; later the snuffer as well; last of all, bolts called down in a row */
-      if(e.stT<=0){ const k=e.n++%(mood+2);
-        if(k===mood+1){ e.st='aim'; e.stT=0.7; sfx.ghost(); }
+      if(e.stT<=0){ const turn=e.n++, k=(turn>>1)%(mood+1);
+        if(turn&1){ e.st='aim'; e.stT=0.7; sfx.ghost(); }
         else if(k===0){ e.st='pour'; e.stT=1.6; e.orb=0; }
         else if(k===1){ e.st='snuff'; e.stT=0.9; sfx.dark(); }
         else { e.st='call'; e.stT=0.95; e.cols=[p.x,p.x-3.2,p.x+3.2,p.x-6.4,p.x+6.4]; sfx.bleep(); } } }
@@ -446,8 +447,8 @@ defEnemy('baron',{boss:true,heavy:true,fly:true,
     else if(e.st==='call'){ for(const c of e.cols) if(Math.random()<dt*30) spawnPart(c+(Math.random()-0.5)*0.5,2.1,0.2,'#b58cff',0,2+Math.random()*2,0,0.3,0.1,0,true);
       if(e.stT<=0){ for(const c of e.cols) throwAt(c,11.5,0,-16,mDarkOrb,'dorb',{g:0,r:0.36,glow:true,col:'#8a5cf0',scale:1.4}); sfx.zap(); flash(0.2); e.st='drift'; e.stT=1.5; } }
     else if(e.st==='aim'){ if(e.stT<=0){ e.st='swoop'; e.stT=0; e.sx=e.x; e.ex=clamp(p.x+(p.x-e.x>0?1:-1)*5,e.x0,e.x1); e.sy=e.y; } }
-    else if(e.st==='swoop'){ const u=Math.min(1,-e.stT/(1.5-rage*0.4)), k=2*u-1; e.x=lerp(e.sx,e.ex,u); e.y=1.7+(e.sy-1.7)*k*k*(u<0.5?1:0.2); if(u>=1){ e.st='tired'; e.stT=1.9-rage*0.6; } }
-    else if(e.st==='tired'){ e.y+=(1.6-e.y)*Math.min(1,dt*6); if(e.stT<=0){ e.st='drift'; e.stT=2.4-rage; } }
+    else if(e.st==='swoop'){ const u=Math.min(1,-e.stT/(1.5-rage*0.4)), k=2*u-1; e.x=lerp(e.sx,e.ex,u); e.y=1.7+(e.sy-1.7)*k*k*(u<0.5?1:0.2); if(u>=1){ e.st='tired'; e.stT=2.3-rage*0.7; } }
+    else if(e.st==='tired'){ e.y+=(1.6-e.y)*Math.min(1,dt*6); if(e.stT<=0){ e.st='drift'; e.stT=1.6-rage*0.6; } }
     baronDark=e.dark>0?Math.min(1,e.dark,(6-e.dark)*2):0; },
   hurt(e){ e.st='drift'; e.stT=1.6; e.dark=Math.min(e.dark,0.5); },
   down(){ dawn=0; baronDark=0; sfx.dawn(); },

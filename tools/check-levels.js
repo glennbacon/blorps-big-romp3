@@ -212,7 +212,7 @@ function harness(){
       if(e.type==='icicle'){ if(sol(Math.floor(e.x),Math.floor(e.y))) out.push('icicle at '+e.x+','+e.y+' is inside a solid tile'); if(!floor(Math.floor(e.x),Math.floor(e.y)+1)) out.push('icicle at '+e.x+','+e.y+' has nothing to hang from'); continue; }
       if(e.type==='jelly'||e.type==='puffer'){ if(!wet(e.x,e.y+0.4)) out.push(e.type+' at '+e.x+','+e.y+' is not in water'); }
       if(e.type==='shade') continue;
-      if(K.fly){ if(e.type!=='ghost'&&e.type!=='snapper'&&e.type!=='ember'&&sol(Math.floor(e.x),Math.floor(e.y+0.2))) out.push(e.type+' at '+e.x+','+e.y+' starts inside a solid tile'); continue; }
+      if(K.fly){ if(e.type!=='ghost'&&e.type!=='snapper'&&e.type!=='ember'&&e.type!=='wisp'&&sol(Math.floor(e.x),Math.floor(e.y+0.2))) out.push(e.type+' at '+e.x+','+e.y+' starts inside a solid tile'); continue; }
       onFloor(e.type,e.x,e.y);
     }
     for(const k of L0.contents.keys()){ const id=t[k]; if(id!==BRICK&&id!==QBLOCK&&id!==HIDDEN) out.push('block contents at '+(k%W0)+','+Math.floor(k/W0)+' have no block'); }

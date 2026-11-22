@@ -326,6 +326,7 @@ function updatePlayer(dt){
     else if(p.form===4&&p.dashCool<=0&&p.dash<=0&&!p.pound&&!p.swim&&p.launchT<=0&&!(p.dashUsed&&!p.onGround)) startDash(); }
 
   /* gravity, and everything that argues with it */
+  const vy0=p.vy; /* before gravity has its say: a geyser overrules it */
   if(p.dash>0){ p.vy=0; }
   else if(p.pound===1){ p.vy=0; if(p.poundT<=0){ p.pound=2; p.vy=-25; } }
   else if(p.pound===2){ p.vy=-25; }
@@ -346,8 +347,10 @@ function updatePlayer(dt){
   /* a geyser carries him to its top and holds him there; from the top he can jump */
   p.geyser=false;
   for(const g of geysers){ if(g.on<=0.3||p.pound||p.dash>0||(p.jumping&&p.vy>0)||p.swim) continue; const top=g.y+g.h*g.on;
-    if(Math.abs(p.x-g.x)<0.85&&p.y>=g.y-0.3&&p.y<top+0.5){ const want=clamp((top-p.y)*6,-2,10.5); p.vy+=(want-p.vy)*Math.min(1,dt*10); p.jumping=false; p.glide=false; p.geyser=true;
-      if(top-p.y<0.7) p.coyote=0.09; p.airJumps=p.form===3?1:0; p.dashUsed=false; } }
+    if(Math.abs(p.x-g.x)<0.85&&p.y>=g.y-0.3&&p.y<top+0.5){
+      /* up at a good lick, easing in to the crest, and held there: gravity has no say inside the column */
+      const dy=top-p.y, want=dy>0.05?Math.min(10.5,2.5+dy*8):clamp(dy*8,-2,0); p.vy=vy0+(want-vy0)*Math.min(1,dt*12); p.jumping=false; p.glide=false; p.geyser=true;
+      if(dy<0.7) p.coyote=0.09; p.airJumps=p.form===3?1:0; p.dashUsed=false; } }
 
   /* a tall Blorp who ends up inside a low gap is nudged out instead of sticking */
   p.wall=0;
