@@ -71,7 +71,9 @@ New: bouncy blocks (drums, hay bales, trampolines: hold jump as you land to go h
 
 **Monsters**
 
-New: Petalpuff, a dandelion that drifts after Blorp; Buzzby the bee, who dives; Gloop, who splits in two when stomped; Ribbit, whose tongue has to be jumped; Wisps that circle in the dark; Swoops that dive across their beat; Rattles the skeleton, who gets up again; rollers; Mimics that look like blocks; Zapbots that shoot straight; Totters, three to a stack; saws on tracks; balloons to bounce on; and Smudge, Blorp's own shadow, who does whatever he did a moment ago. Most of the first two games' monsters are back as well.
+New: Petalpuff, a dandelion that drifts after Blorp; Buzzby the bee, who dives; Gloop, who splits in two when stomped; Ribbit, whose tongue has to be jumped; Wisps that circle in the dark; Swoops that dive across their beat; Rattles the skeleton, who gets up again; rollers; Mimics that look like blocks; Zapbots that shoot straight; Totters, three to a stack; saws on tracks; balloons to bounce on; and Smudge, Blorp's own shadow, who does whatever he did a moment ago. Most of the first two games' monsters are back as well, many in a new body for the world they turn up in.
+
+Some worlds have creatures nobody else has: hay carts to ride in the orchard, grubs that let go of the hive's ceiling, a Dozy asleep in the fen and a Gulper under it, the wind-up Tick-Tock at the fair, notes that hop on the beat, pigeons over the rooftops, Glimmers that carry a lamp through the caverns, and the Baron's Snuffers.
 
 **Bosses**
 
